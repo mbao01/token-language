@@ -1,0 +1,11 @@
+out
+client/out
+server/out
+dist
+node_modules
+client/node_modules/**
+server/node_modules/**
+.vscode-test/
+*.vsix
+client/tsconfig.tsbuildinfo
+server/tsconfig.tsbuildinfo
