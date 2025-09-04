@@ -1,23 +1,14 @@
-import {
-  Connection,
-  Diagnostic,
-  DiagnosticSeverity,
-} from "vscode-languageserver/node";
+import { Diagnostic, DiagnosticSeverity } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { getDocumentSettings } from "./getDocumentSettings";
 import type { CapabilitiesOptions } from "./types";
 
 export const validateTextDocument = async (
-  workspace: Connection["workspace"],
   textDocument: TextDocument,
   options?: CapabilitiesOptions
 ): Promise<Diagnostic[]> => {
   // In this simple example we get the settings for every validate run.
-  const settings = await getDocumentSettings(
-    workspace,
-    textDocument.uri,
-    options
-  );
+  const settings = await getDocumentSettings(textDocument.uri, options);
 
   // The validator creates diagnostics for all uppercase words length 2 and more
   const text = textDocument.getText();

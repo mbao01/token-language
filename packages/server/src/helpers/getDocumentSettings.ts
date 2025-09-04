@@ -1,5 +1,5 @@
-import { Connection } from "vscode-languageserver/node";
 import type { CapabilitiesOptions, TokenLanguageSettings } from "./types";
+import { connection } from "../server/connection";
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
@@ -11,7 +11,6 @@ let globalSettings: TokenLanguageSettings = defaultSettings;
 const documentSettings = new Map<string, Thenable<TokenLanguageSettings>>();
 
 export const getDocumentSettings = (
-  workspace: Connection["workspace"],
   resource: string,
   options?: CapabilitiesOptions
 ): Thenable<TokenLanguageSettings> => {
@@ -20,7 +19,7 @@ export const getDocumentSettings = (
   }
   let result = documentSettings.get(resource);
   if (!result) {
-    result = workspace.getConfiguration({
+    result = connection.workspace.getConfiguration({
       scopeUri: resource,
       section: "tokenLanguage",
     });

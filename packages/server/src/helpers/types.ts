@@ -5,7 +5,7 @@ export type CapabilitiesOptions = {
 
 export type TokenLanguageSettings = {
   maxNumberOfProblems: number;
-  tokens: {
+  tokens?: {
     srcDir: string[];
     outDir: string[];
     watchCommand: string;
