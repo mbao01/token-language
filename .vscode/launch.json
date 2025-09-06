@@ -17,6 +17,22 @@
       ],
       "preLaunchTask": "${defaultBuildTask}",
       "autoAttachChildProcesses": true
+    },
+    {
+      "name": "E2E: Run Token Extension tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/client/out/test/runTest.js",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "pnpm:compile:e2e",
+      "env": {
+        "CODE_TESTS_PATH": "${workspaceFolder}/packages/client/out/test",
+        "CODE_TESTS_WORKSPACE": "${workspaceFolder}/packages/client/testFixture"
+      },
+      "outFiles": [
+        "${workspaceFolder}/packages/client/out/**/*.js",
+        "${workspaceFolder}/packages/server/out/**/*.js"
+      ]
     }
   ]
 }

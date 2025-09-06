@@ -16,6 +16,21 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "pnpm:compile:e2e",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["compile"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Compile the project for e2e tests"
     }
     // {
     //   "type": "npm",
