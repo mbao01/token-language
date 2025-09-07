@@ -23,7 +23,10 @@ export const handleDefinition: ServerRequestHandler<
   Location[] | DefinitionLink[],
   void
 > = (params) => {
-  connection.console.log('🔗 Definition Requested: handleDefinition: start');
+  connection.console.log("🔗 Definition Requested: handleDefinition: start");
+  // here, show the hierarchy to the leaf node of the item whose definition is required.
+  // here, show the value of the item for based on their location e.g nutmeg -> default -> light mode, nutmeg -> bigbear -> light mode
+  // here show whether it uses a deprecated token in it's path or not
   const doc = documents.get(params.textDocument.uri);
   if (!doc) return null;
 
@@ -38,5 +41,5 @@ export const handleDefinition: ServerRequestHandler<
     uri: tokenFile.uri, // e.g. file://.../tokens/colors.json
     range: tokenFile.range, // position inside that file where the token is defined
   };
-  connection.console.log('🔗 Definition Requested: handleDefinition: end');
+  connection.console.log("🔗 Definition Requested: handleDefinition: end");
 };
