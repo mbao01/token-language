@@ -7,6 +7,7 @@ import { connection } from "../../server/connection";
 import { CAPABILITIES } from "../../server/capabilities";
 
 export const handleInitialized: NotificationHandler<InitializedParams> = () => {
+  connection.console.log('🚀 Server Initialized: handleInitialized: start');
   if (CAPABILITIES.hasConfigurationCapability) {
     // Register for all configuration changes.
     connection.client.register(
@@ -19,4 +20,5 @@ export const handleInitialized: NotificationHandler<InitializedParams> = () => {
       connection.console.log("Workspace folder change event received.");
     });
   }
+  connection.console.log('🚀 Server Initialized: handleInitialized: end');
 };

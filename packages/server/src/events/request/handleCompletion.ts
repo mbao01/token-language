@@ -7,6 +7,7 @@ import {
   ServerRequestHandler,
   TextDocumentPositionParams,
 } from "vscode-languageserver/node";
+import { connection } from "../../server/connection";
 
 /**
  * This handler provides the initial list of the completion items.
@@ -19,10 +20,11 @@ export const handleCompletion: ServerRequestHandler<
   CompletionItem[],
   void
 > = (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+  connection.console.log('💡 Completion Requested: handleCompletion: start');
   // The pass parameter contains the position of the text document in
   // which code complete got requested. For the example we ignore this
   // info and always provide the same completion items.
-  return [
+  const result: CompletionItem[] = [
     {
       label: "TypeScript",
       kind: CompletionItemKind.Text,
@@ -34,6 +36,8 @@ export const handleCompletion: ServerRequestHandler<
       data: 2,
     },
   ];
+  connection.console.log('💡 Completion Requested: handleCompletion: end');
+  return result;
 };
 
 /**
@@ -47,6 +51,7 @@ export const handleCompletionResolve: RequestHandler<
   CompletionItem,
   void
 > = (item: CompletionItem): CompletionItem => {
+  connection.console.log('💡 Completion Resolving: handleCompletionResolve: start');
   if (item.data === 1) {
     item.detail = "TypeScript details";
     item.documentation = "TypeScript documentation";
@@ -54,5 +59,6 @@ export const handleCompletionResolve: RequestHandler<
     item.detail = "JavaScript details";
     item.documentation = "JavaScript documentation";
   }
+  connection.console.log('💡 Completion Resolving: handleCompletionResolve: end');
   return item;
 };

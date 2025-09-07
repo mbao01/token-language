@@ -7,6 +7,7 @@ import {
   ServerRequestHandler,
 } from "vscode-languageserver/node";
 import { documents } from "../../server/documents";
+import { connection } from "../../server/connection";
 import { getTokenAtPosition } from "../../helpers/token";
 
 interface TokenLocation {
@@ -22,6 +23,7 @@ export const handleDefinition: ServerRequestHandler<
   Location[] | DefinitionLink[],
   void
 > = (params) => {
+  connection.console.log('🔗 Definition Requested: handleDefinition: start');
   const doc = documents.get(params.textDocument.uri);
   if (!doc) return null;
 
@@ -36,4 +38,5 @@ export const handleDefinition: ServerRequestHandler<
     uri: tokenFile.uri, // e.g. file://.../tokens/colors.json
     range: tokenFile.range, // position inside that file where the token is defined
   };
+  connection.console.log('🔗 Definition Requested: handleDefinition: end');
 };

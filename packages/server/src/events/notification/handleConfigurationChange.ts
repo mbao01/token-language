@@ -8,7 +8,7 @@ import { setGlobalSettings } from "../../helpers/getDocumentSettings";
 export const handleConfigurationChange: NotificationHandler<
   DidChangeConfigurationParams
 > = (change) => {
-  connection.console.log("⚙️ Configuration changed");
+  connection.console.log('⚙️ Configuration Changed: handleConfigurationChange: start');
 
   setGlobalSettings(change.settings?.tokenLanguage);
 
@@ -16,4 +16,5 @@ export const handleConfigurationChange: NotificationHandler<
   // We could optimize things here and re-fetch the setting first can compare it
   // to the existing setting, but this is out of scope for this example.
   connection.languages.diagnostics.refresh();
+  connection.console.log('⚙️ Configuration Changed: handleConfigurationChange: end');
 };
