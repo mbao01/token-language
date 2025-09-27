@@ -1,0 +1,21 @@
+{
+  "name": "tokens-utilities",
+  "description": "Token utilities for the language server.",
+  "version": "1.0.0",
+  "author": "Ayomide Bakare",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./helpers": "./src/helpers/index.ts"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
+  },
+  "scripts": {
+    "build": "exit 0",
+    "watch": "exit 0"
+  }
+}

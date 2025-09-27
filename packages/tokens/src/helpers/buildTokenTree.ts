@@ -64,7 +64,6 @@ export const buildTokenTree = (allTokens: TokenNode[]): TokenTree => {
         key: `${domain}/${platform}/${buildName}/${theme}/${mode}`,
         value: `${domain} - ${platform} - ${buildName} - ${theme} - ${mode}`,
         children: new Map(),
-        tokens: [],
       };
     }
 
@@ -86,6 +85,7 @@ export const buildTokenTree = (allTokens: TokenNode[]): TokenTree => {
     categoryNode.tokens.push(token);
   }
 
+  // TODO: maybe save tree somewhere so it can be read?
   return tree;
 };
 
