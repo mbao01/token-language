@@ -30,7 +30,7 @@ export const handleDefinition: ServerRequestHandler<
   const doc = documents.get(params.textDocument.uri);
   if (!doc) return null;
 
-  const word = getTokenAtPosition(doc, params.position);
+  const { token: word } = getTokenAtPosition(doc, params.position);
   if (!word) return null;
 
   // If the word is a token, return its "definition location"

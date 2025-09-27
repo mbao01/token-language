@@ -8,6 +8,7 @@ import {
   TextDocumentPositionParams,
 } from "vscode-languageserver/node";
 import { connection } from "../../server/connection";
+import { getFilenameAndExtension } from "../../helpers/getFilenameAndExtension";
 
 /**
  * This handler provides the initial list of the completion items.
@@ -20,7 +21,15 @@ export const handleCompletion: ServerRequestHandler<
   CompletionItem[],
   void
 > = (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-  connection.console.log('💡 Completion Requested: handleCompletion: start');
+  connection.console.log("💡 Completion Requested: handleCompletion: start");
+  connection.console.log(
+    `💡 ${_textDocumentPosition.textDocument.uri} ${_textDocumentPosition.position.character} ${_textDocumentPosition.position.line}`
+  );
+
+  const { filename } = getFilenameAndExtension(
+    _textDocumentPosition.textDocument.uri
+  );
+
   // The pass parameter contains the position of the text document in
   // which code complete got requested. For the example we ignore this
   // info and always provide the same completion items.
@@ -36,7 +45,7 @@ export const handleCompletion: ServerRequestHandler<
       data: 2,
     },
   ];
-  connection.console.log('💡 Completion Requested: handleCompletion: end');
+  connection.console.log("💡 Completion Requested: handleCompletion: end");
   return result;
 };
 
