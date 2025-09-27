@@ -1,4 +1,4 @@
-import type { TokenGraph, TokenNode } from "../../../../types/token";
+import type { TokenGraph, TokenNode } from "@/token";
 
 const formatToken = (token: TokenNode) => {
   return {

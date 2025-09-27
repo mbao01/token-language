@@ -1,4 +1,4 @@
-import { type TokenGraph } from "../../../../types/token";
+import { type TokenGraph } from "@/token";
 
 export const renderDependencyGraph = (
   title: string,

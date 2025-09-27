@@ -1,4 +1,4 @@
-import { TokenNode } from "../../../../types/token";
+import { TokenNode } from "@/token";
 
 type FindTokenArgs = {
   query: Pick<TokenNode, "name" | "src" | "category"> & {
