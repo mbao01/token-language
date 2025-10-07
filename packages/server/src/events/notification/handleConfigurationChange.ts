@@ -7,10 +7,10 @@ import { setGlobalSettings } from "../../helpers/getDocumentSettings";
 
 export const handleConfigurationChange: NotificationHandler<
   DidChangeConfigurationParams
-> = (change) => {
+> = async () => {
   connection.console.log('⚙️ Configuration Changed: handleConfigurationChange: start');
 
-  setGlobalSettings(change.settings?.tokenLanguage);
+  await setGlobalSettings();
 
   // Refresh the diagnostics since the `maxNumberOfProblems` could have changed.
   // We could optimize things here and re-fetch the setting first can compare it

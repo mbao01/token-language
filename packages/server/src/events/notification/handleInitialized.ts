@@ -5,8 +5,9 @@ import {
 } from "vscode-languageserver/node";
 import { connection } from "../../server/connection";
 import { CAPABILITIES } from "../../server/capabilities";
+import { setGlobalSettings } from "../../helpers/getDocumentSettings";
 
-export const handleInitialized: NotificationHandler<InitializedParams> = () => {
+export const handleInitialized: NotificationHandler<InitializedParams> = async () => {
   connection.console.log('🚀 Server Initialized: handleInitialized: start');
   if (CAPABILITIES.hasConfigurationCapability) {
     // Register for all configuration changes.
@@ -20,5 +21,7 @@ export const handleInitialized: NotificationHandler<InitializedParams> = () => {
       connection.console.log("Workspace folder change event received.");
     });
   }
+
+  await setGlobalSettings();
   connection.console.log('🚀 Server Initialized: handleInitialized: end');
 };
