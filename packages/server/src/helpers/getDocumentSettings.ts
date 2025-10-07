@@ -36,6 +36,10 @@ export const setGlobalSettings = async () => {
   globalSettings = settings;
 };
 
+export const getGlobalSettings = () => {
+  return globalSettings;
+};
+
 export const deleteDocumentSettings = (resource: string) => {
   documentSettings.delete(resource);
 };
