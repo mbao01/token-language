@@ -36,6 +36,7 @@ export const handleInitialize: ServerRequestHandler<
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       hoverProvider: true,
+      referencesProvider: true,
       definitionProvider: true,
       // Tell the client that this server supports code completion.
       completionProvider: {

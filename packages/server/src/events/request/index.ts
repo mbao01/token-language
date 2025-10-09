@@ -3,3 +3,4 @@ export { handleDefinition } from "./handleDefinition";
 export { handleDiagnostics } from "./handleDiagnostics";
 export { handleHover } from "./handleHover";
 export { handleInitialize } from "./handleInitialize";
+export { handleReferences } from "./handleReferences";

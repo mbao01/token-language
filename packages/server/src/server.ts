@@ -15,6 +15,7 @@ import {
   handleDefinition,
   handleDiagnostics,
   handleHover,
+  handleReferences,
 } from "./events/request";
 import { handleInitialize } from "./events/request";
 
@@ -38,6 +39,10 @@ connection.onDidChangeWatchedFiles(handleFileChange);
 /* --------- User Requests --------- */
 // emitted when an item is hovered on
 connection.onHover(handleHover);
+
+/* --------- User Requests --------- */
+// emitted when a references is requested for an item
+connection.onReferences(handleReferences);
 
 // emitted when an item definition is requested
 connection.onDefinition(handleDefinition);
