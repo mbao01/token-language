@@ -3,43 +3,70 @@ import {
   DefinitionLink,
   DefinitionParams,
   Location,
+  Position,
   Range,
   ServerRequestHandler,
 } from "vscode-languageserver/node";
 import { documents } from "../../server/documents";
 import { connection } from "../../server/connection";
-import { getTokenAtPosition } from "../../helpers/token";
-
-interface TokenLocation {
-  uri: string;
-  range: Range;
-}
-
-const tokenIndex: Record<string, TokenLocation> = {};
+import { findDefinition, getTokenAtPosition } from "../../helpers/token";
+import {
+  findToken,
+  getTokensFromFile,
+  getTokenSrcAndCategory,
+} from "tokens-utilities/helpers";
+import { getGlobalSettings } from "../../helpers/getDocumentSettings";
 
 export const handleDefinition: ServerRequestHandler<
   DefinitionParams,
   Definition | DefinitionLink[] | undefined | null,
   Location[] | DefinitionLink[],
   void
-> = (params) => {
+> = async (params) => {
   connection.console.log("🔗 Definition Requested: handleDefinition: start");
   // here, show the hierarchy to the leaf node of the item whose definition is required.
   // here, show the value of the item for based on their location e.g nutmeg -> default -> light mode, nutmeg -> bigbear -> light mode
   // here show whether it uses a deprecated token in it's path or not
-  const doc = documents.get(params.textDocument.uri);
-  if (!doc) return null;
+  const { textDocument, position } = params;
+  const doc = documents.get(textDocument.uri);
+  if (!doc) return [];
 
-  const { token: word } = getTokenAtPosition(doc, params.position);
-  if (!word) return null;
+  const settings = getGlobalSettings();
+  if (!settings.tokens.srcPackage) return [];
 
-  // If the word is a token, return its "definition location"
-  const tokenFile = tokenIndex[word];
-  if (!tokenFile) return null;
+  const { absoluteSrc, category } = getTokenSrcAndCategory(textDocument.uri);
 
-  return {
-    uri: tokenFile.uri, // e.g. file://.../tokens/colors.json
-    range: tokenFile.range, // position inside that file where the token is defined
+  const { token: name, isDefinition } = getTokenAtPosition(doc, position);
+  if (!(name && absoluteSrc && category)) return [];
+
+  const query = {
+    name,
+    src: absoluteSrc,
+    category,
+    isDefinition,
   };
-  connection.console.log("🔗 Definition Requested: handleDefinition: end");
+
+  const tokens = getTokensFromFile(settings.tokens.json);
+  if (!tokens) return;
+
+  const t = findToken({ query, tokens });
+  if (!t) return;
+
+  const { definition } = await findDefinition(
+    t,
+    { isDefinition, absoluteSrc },
+    settings
+  );
+
+  const locations = definition.map(({ uri, line, range }) =>
+    Location.create(
+      uri,
+      Range.create(
+        Position.create(line, range.start),
+        Position.create(line, range.end)
+      )
+    )
+  );
+
+  return locations;
 };
