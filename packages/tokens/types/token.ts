@@ -11,6 +11,8 @@ export type TokenNode = {
   src: string; // the location of the token in the file system
   category: string; // the name of the file the token is in without it's extension, e.g aliases-colors, notification, user-quote, aliases-font-color, aliases-border, etc.
   originalValue: string; // this is usually in the form of the interpolated string and points to another alias value. e.g {!COLOR_UI_NEUTRAL_80}
+  type?: string;
+  deprecated?: boolean;
 };
 
 export type TokenGraph = {

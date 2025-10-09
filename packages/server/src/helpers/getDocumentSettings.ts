@@ -5,7 +5,8 @@ import { connection } from "../server/connection";
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
 
-let globalSettings: TokenLanguageSettings | undefined;
+const defaultSettings = { maxNumberOfProblems: 100 } as TokenLanguageSettings;
+let globalSettings: TokenLanguageSettings = defaultSettings;
 
 // Cache the settings of all open documents
 const documentSettings = new Map<string, Thenable<TokenLanguageSettings>>();
@@ -14,7 +15,7 @@ export const getDocumentSettings = (
   resource: string,
   options?: CapabilitiesOptions,
   shouldUseGlobalSettings: boolean = true
-): Thenable<TokenLanguageSettings | undefined> => {
+): Thenable<TokenLanguageSettings> => {
   if (shouldUseGlobalSettings || !options?.hasConfigurationCapability) {
     return Promise.resolve(globalSettings);
   }

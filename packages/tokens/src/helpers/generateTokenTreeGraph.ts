@@ -1,4 +1,5 @@
 import type { TokenGraph, TokenNode } from "@/token";
+import { isSameTheme } from "./isSameTheme";
 
 const formatToken = (token: TokenNode) => {
   return {
@@ -50,7 +51,7 @@ const generateTokenDependentGraph = (
     // if a token and an alias have the same name, assume any dependencies are mapped to the alias and not the token
     if (isTokenMappedToAliasWithSameName) return false;
 
-    return t.originalValue.toString().includes(`{!${token.name}}`);
+    return t.originalValue.toString().includes(`{!${token.name}}`) && isSameTheme(t, token);
   });
 
   return {

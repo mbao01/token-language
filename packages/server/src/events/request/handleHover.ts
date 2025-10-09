@@ -3,23 +3,26 @@ import {
   HoverParams,
   ServerRequestHandler,
 } from "vscode-languageserver/node";
-import { documents } from "../../server/documents";
-import { getTokenAtPosition } from "../../helpers/token";
 import {
+  drawGraph,
   findToken,
   findTokenInGraph,
   generateTokenTreeGraph,
+  getThemeComparison,
+  getTokensFromFile,
   getTokenSrcAndCategory,
   renderDependencyGraph,
 } from "tokens-utilities/helpers";
-import { tokens } from "./c";
+import { getTokenAtPosition } from "../../helpers/token";
+import { getGlobalSettings } from "../../helpers/getDocumentSettings";
+import { documents } from "../../server/documents";
 
 export const handleHover: ServerRequestHandler<
   HoverParams,
   Hover | undefined | null,
   never,
   void
-> = (params) => {
+> = async (params) => {
   const doc = documents.get(params.textDocument.uri);
   if (!doc) return;
 
@@ -41,43 +44,58 @@ export const handleHover: ServerRequestHandler<
     isDefinition,
   };
 
-  // const tokens: any[] = [];
-  const t = findToken({ query, tokens: tokens as any[] });
+  const settings = getGlobalSettings();
+  if (!settings) return;
 
+  const tokens = getTokensFromFile(settings.tokens.json);
+  if (!tokens) return;
+
+  const t = findToken({ query, tokens });
   if (!t) return;
 
   // TODO get token information from some tree!!
-  const graph = generateTokenTreeGraph(t, tokens as any[]);
-  const renderedGraph = renderDependencyGraph("Dependency Graph", graph);
+  const graph = generateTokenTreeGraph(t, tokens);
+  const { filepath } = await drawGraph(graph, settings.tokens.srcPackage);
   const token = findTokenInGraph(query.name, graph);
 
   if (!token) return;
 
   const content = [
-    { label: "Type", value: token._tokenType },
-    { label: "Domain", value: token.domain },
-    { label: "Build name", value: token.buildName },
-    { label: "Theme", value: token.theme },
-    { label: "Mode", value: token.mode },
-    { label: "Platform", value: token.platform },
-    { label: "Value", value: token.value },
-    { label: "Source", value: `_${token.src}_` },
+    ["Type", token.type],
+    ["Category", token.category],
+    ["Theme", token.theme],
+    ["Mode", token.mode],
+    ["Platform", token.platform],
+    ["Value", token.value],
+    ["Source", `_${token.src}_`],
   ];
+  const comparison = getThemeComparison(token, tokens);
 
   const contents = {
     kind: "markdown",
     value: [
-      `#### 🎨 \`${query.name}\``,
+      `#### 🎨 \`${query.name}\` (${token._tokenType})`,
+      `---`,
       `\n`,
-      `| Property | Value |`,
-      `|:----------|----------:|`,
-      ...content.map(({ label, value }) => `| ${[label, value].join(" | ")} |`),
+      `| ${content.map((c) => c[0]).join("\t | ")} |`,
+      `|${content.map((c) => ":----------").join(" | ")}|`,
+      `| ${content.map((c) => c[1]).join("\t | ")} |`,
       ``,
       `---`,
-      renderedGraph,
-      `[📘 Token explorer](https://code.visualstudio.com/api)`,
       ``,
-      `......................................................................................`,
+      `| Theme | Value | Source |`,
+      `|:----------|${
+        ["color", "size"].includes(token.type) ? "----------:" : ":----------"
+      }|:----------|`,
+      comparison.content
+        .map((c, i) => `| ${comparison.headers[i]} | ${c.value} | ${c.src} |`)
+        .join("\n"),
+      ``,
+      `---`,
+      `[📘 Token explorer](https://code.visualstudio.com/api) [view image](${filepath})`,
+      ``,
+      `![${graph.name}](${filepath})`,
+      ``,
     ].join("\n"),
   } as const;
 
