@@ -11,7 +11,6 @@ import {
   getThemeComparison,
   getTokensFromFile,
   getTokenSrcAndCategory,
-  renderDependencyGraph,
 } from "tokens-utilities/helpers";
 import { getTokenAtPosition } from "../../helpers/token";
 import { getGlobalSettings } from "../../helpers/getDocumentSettings";
@@ -60,14 +59,23 @@ export const handleHover: ServerRequestHandler<
 
   if (!token) return;
 
-  const content = [
-    ["Type", token.type],
-    ["Category", token.category],
-    ["Theme", token.theme],
-    ["Mode", token.mode],
-    ["Platform", token.platform],
-    ["Value", token.value],
-    ["Source", `_${token.src}_`],
+  const content = tokens.filter(
+    (_t) =>
+      _t.src === token.src &&
+      _t.name === token.name &&
+      _t.mode === token.mode &&
+      _t.theme === token.theme &&
+      _t.category === token.category
+  );
+
+  const headers = [
+    { label: "Platform", key: "platform" },
+    { label: "Type", key: "type" },
+    { label: "Category", key: "category" },
+    { label: "Theme", key: "buildTheme" },
+    { label: "Mode", key: "mode" },
+    { label: "Value", key: "value" },
+    { label: "Source", key: "src" },
   ];
   const comparison = getThemeComparison(token, tokens);
 
@@ -77,18 +85,23 @@ export const handleHover: ServerRequestHandler<
       `#### 🎨 \`${query.name}\` (${token._tokenType})`,
       `---`,
       `\n`,
-      `| ${content.map((c) => c[0]).join("\t | ")} |`,
-      `|${content.map((c) => ":----------").join(" | ")}|`,
-      `| ${content.map((c) => c[1]).join("\t | ")} |`,
+      `| ${headers.map(({ label }) => label).join("\t | ")} |`,
+      `|${headers.map(() => ":----------").join(" | ")}|`,
+      content
+        .map((row) => `| ${headers.map(({ key }) => row[key]).join(" | ")} | `)
+        .join("\n"),
       ``,
       `---`,
       ``,
-      `| Theme | Value | Source |`,
-      `|:----------|${
-        ["color", "size"].includes(token.type) ? "----------:" : ":----------"
-      }|:----------|`,
+      `| ${comparison.headers.join(" | ")} |`,
+      `|${comparison.headers.map(() => ":----------").join("|")}|`,
       comparison.content
-        .map((c, i) => `| ${comparison.headers[i]} | ${c.value} | ${c.src} |`)
+        .map(
+          (row) =>
+            `| ${comparison.headers
+              .map((header) => row[header]?.value ?? row[header] ?? "-")
+              .join(" | ")} |`
+        )
         .join("\n"),
       ``,
       `---`,

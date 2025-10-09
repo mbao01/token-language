@@ -3,54 +3,58 @@ import { isSameName } from "./isSameName";
 import { isSamePlatform } from "./isSamePlatform";
 import { isSameTheme } from "./isSameTheme";
 import { getThemeName } from "./getThemeName";
+import { applyHeirarchyByTheme } from "./applyHeirarchy";
 
 export const getThemeComparison = (token: TokenNode, tokens: TokenNode[]) => {
-  const headers: string[] = [];
-  const tokensMap = new Map();
-  const headersSet = new Set();
+  type TokenTheme = {
+    value: string;
+    src: string;
+  };
+
+  const tokenTheme: Record<string, TokenTheme> = {};
 
   const similarTokens = tokens.filter(
     (t) => isSameName(t, token) && isSamePlatform(t, token)
   );
 
-  similarTokens.forEach((t) => {
-    const { name, value, originalValue } = t;
-    const tokenObject = tokensMap.get(name) || {};
-    const key = getThemeName(t);
+  // similarTokens.forEach((t) => {
+  //   const { value, originalValue } = t;
+  //   const key = getThemeName(t);
 
-    const originalToken = tokens.find(
-      (t) =>
-        t._tokenType === "alias" &&
-        `{!${t.name}}` === originalValue &&
-        isSameTheme(t, token)
-    );
+  //   const originalToken = tokens.find(
+  //     (t) =>
+  //       t._tokenType === "alias" &&
+  //       `{!${t.name}}` === originalValue &&
+  //       isSameTheme(t, token)
+  //   );
+  //   const tokenValue = originalToken?.value ?? value ?? "";
+  //   // use inheritance here
+  //   tokenTheme[key] = {
+  //     value:
+  //       typeof tokenValue === "string" && tokenValue.includes(",")
+  //         ? `"${tokenValue}"`
+  //         : tokenValue,
+  //     src: t.src,
+  //   };
+  // });
 
-    const tokenValue = originalToken?.value ?? value ?? "";
-    tokenObject[key] = {
-      value:
-        typeof tokenValue === "string" && tokenValue.includes(",")
-          ? `"${tokenValue}"`
-          : tokenValue,
-      src: t.src,
-    };
+  const { themes } = applyHeirarchyByTheme(undefined, similarTokens);
 
-    headersSet.add(key);
-    tokensMap.set(name, tokenObject);
-  });
-
-  const sortedHeaders = [...headersSet].sort() as string[];
-
-  const csvDataArray: { value: string; src: string }[] = [];
-  [...tokensMap].forEach(([, obj]) => {
-    Object.entries(obj).forEach(([k, v]) => {
-      sortedHeaders.push(k);
-      csvDataArray.push(v as { value: string; src: string });
+  let headers: string[] = [];
+  const content: Record<string, TokenNode | string>[] = [];
+  Object.entries(themes).forEach(([theme, platformTokens]) => {
+    const row: Record<string, TokenNode | string> = { theme };
+    Object.entries(platformTokens).forEach(([platform, t]) => {
+      headers.push(platform);
+      row[platform] = t;
     });
+    content.push(row);
   });
+  headers = ["theme", ...new Set(headers)];
 
   const comparison = {
-    headers: headers.concat(sortedHeaders),
-    content: csvDataArray,
+    headers,
+    content,
   };
 
   return comparison;
