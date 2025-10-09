@@ -3,13 +3,16 @@ import path from "path";
 import fg from "fast-glob";
 import { URI } from "vscode-uri";
 import { TokenLanguageSettings } from "../types";
+import { HIERARCHY } from "./hierarchy";
 
 export const findDefinition = async (
   token: any,
   {
+    query,
     isDefinition,
     absoluteSrc,
   }: {
+    query: string;
     isDefinition: boolean | undefined;
     absoluteSrc: string;
   },
@@ -28,7 +31,7 @@ export const findDefinition = async (
     ignore: ["**/node_modules/**", "**/package.json", settings.tokens.json],
   });
 
-  const newName = `"${token.name}"`;
+  const newName = `"${query}"`;
 
   for (const relativePath of files) {
     const filePath = path.join(folderPath, relativePath);
@@ -50,72 +53,55 @@ export const findDefinition = async (
   if (!isDefinition) {
     if (definition.length <= 1) return { definition };
 
-    // const onlyDefault = (d: Definition) =>
-    //   d.relativePath.startsWith(token.src) ||
-    //   d.relativePath.includes(["all-platforms", "all-orgs"].join("/"));
-    // const specificOrg = (d: Definition) =>
-    //   d.relativePath.includes(
-    //     ["all-platforms", ...token.buildName.split("-")].join("/")
-    //   );
-    // const specificTheme = (d: Definition) =>
-    //   d.relativePath.startsWith(token.src) ||
-    //   d.relativePath.includes(
-    //     ["all-platforms", ...token.buildName.split("-"), token.theme].join("/")
-    //   );
-    // const specificMode = (d: Definition) =>
-    //   d.relativePath.startsWith(token.src) ||
-    //   d.relativePath.includes(
-    //     [
-    //       "all-platforms",
-    //       ...token.buildName.split("-"),
-    //       token.theme,
-    //       token.mode,
-    //     ].join("/")
-    //   );
+    const keys = absoluteSrc.includes("all-platforms")
+      ? [
+          [token.buildName.replace("-", "_")],
+          [
+            token.buildName.replace("-", "_"),
+            token.theme === "default" ? undefined : token.theme,
+          ],
+        ]
+      : [
+          [
+            token.platform,
+            token.buildName.replace("-", "_"),
+            token.theme === "default" ? undefined : token.theme,
+            token.mode,
+          ],
+        ];
 
-    // if (token.platform === "all-platforms") {
-    //   if (token.buildName === "default" && token.theme === "default") {
-    //     return definition.filter(onlyDefault);
-    //   }
-    //   return definition.filter((d) => specificOrg(d) || onlyDefault(d));
-    // }
+    const expectations = Object.entries(HIERARCHY)
+      .filter(([k, v]) =>
+        keys.some((key) =>
+          k.includes(key.filter(Boolean).join("_").toUpperCase())
+        )
+      )
+      ?.map(([, v]) => v);
 
-    // // all-platforms/all-orgs/all-themes/all-modes
+    const seen = new Set();
+    const filteredDefinitions: Definition[] = [];
 
-    // if (token.platform === "all-platforms") {
-    // }
+    expectations?.forEach((expectation) => {
+      expectation = expectation.reverse().filter(Boolean);
+      const index = expectation.findIndex((e) => e.includes(token.src));
+      expectation = expectation.slice(index);
 
-    // if (token.platform === "web") {
-    //   return definition.filter(
-    //     (d) =>
-    //       d.relativePath.startsWith(token.src) ||
-    //       d.relativePath.includes(
-    //         `all-platforms/${token.buildName.replace("-", "/")}`
-    //       )
-    //   );
-    // }
+      definition.forEach((d, i) => {
+        if (
+          !seen.has(i) &&
+          expectation.some((e) => `src/${d.relativePath}`.startsWith(e))
+        ) {
+          filteredDefinitions.push(d);
+          seen.add(i);
+        }
+      });
+    });
 
-    // TODO::: Use build-config.csv as source of truth for inheritance??
+    const goToDefinition = filteredDefinitions.reverse().slice(0, 1);
 
-    const key = [
-      token.platform,
-      token.buildName.replace("-", "_"),
-      token.theme === "default" ? undefined : token.theme,
-      token.mode,
-    ]
-      .filter(Boolean)
-      .join("_")
-      .toUpperCase();
-
-    // TODO:: in the same source, we just choose it
-
-    // TODO:: if it is a layer up, we choose it
-    // dark -> all-modes
-    // all-modes -> all-themes, bigbear -> all-themes
-    // platform -> all-platform\
-    // platform_buildname_theme||_mode
-
-    return { definition };
+    return {
+      definition: goToDefinition,
+    };
   }
 
   return { definition };

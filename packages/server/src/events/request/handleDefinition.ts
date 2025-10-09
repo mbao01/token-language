@@ -49,12 +49,12 @@ export const handleDefinition: ServerRequestHandler<
   const tokens = getTokensFromFile(settings.tokens.json);
   if (!tokens) return;
 
-  const t = findToken({ query, tokens });
-  if (!t) return;
+  const token = findToken({ query, tokens });
+  if (!token) return;
 
   const { definition } = await findDefinition(
-    t,
-    { isDefinition, absoluteSrc },
+    token,
+    { query: name, isDefinition, absoluteSrc },
     settings
   );
 
