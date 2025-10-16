@@ -4,13 +4,13 @@ import {
   ServerRequestHandler,
 } from "vscode-languageserver/node";
 import {
-  drawGraph,
-  getClosestToken,
-  findTokenInGraph,
+  generateTokenVisualization,
+  findMatchingToken,
+  searchTokenInGraph,
   generateTokenTreeGraph,
-  getAllTokenThemes,
-  getTokensFromFile,
-  getTokenSrcAndCategory,
+  generateTokenThemeComparison,
+  loadTokensFromFile,
+  parseTokenFilePath,
 } from "tokens-utilities/helpers";
 import { getTokenAtPosition } from "../../helpers/token";
 import { getGlobalSettings } from "../../helpers/getDocumentSettings";
@@ -25,7 +25,7 @@ export const handleHover: ServerRequestHandler<
   const doc = documents.get(params.textDocument.uri);
   if (!doc) return;
 
-  const { absoluteSrc, category } = getTokenSrcAndCategory(
+  const { absoluteSrc, category } = parseTokenFilePath(
     params.textDocument.uri
   );
 
@@ -46,16 +46,16 @@ export const handleHover: ServerRequestHandler<
   const settings = getGlobalSettings();
   if (!settings) return;
 
-  const tokens = getTokensFromFile(settings.tokens.json);
+  const tokens = loadTokensFromFile(settings.tokens.json);
   if (!tokens) return;
 
-  const t = getClosestToken({ query, tokens });
+  const t = findMatchingToken({ query, tokens });
   if (!t) return;
 
   // TODO get token information from some tree!!
   const graph = generateTokenTreeGraph(t, tokens);
-  const { filepath } = await drawGraph(graph, settings.tokens.srcPackage);
-  const token = findTokenInGraph(query.name, graph);
+  const { filepath } = await generateTokenVisualization(graph, settings.tokens.srcPackage);
+  const token = searchTokenInGraph(query.name, graph);
 
   if (!token) return;
 
@@ -77,7 +77,7 @@ export const handleHover: ServerRequestHandler<
     { label: "Value", key: "value" },
     { label: "Source", key: "src" },
   ];
-  const comparison = getAllTokenThemes(token, tokens);
+  const comparison = generateTokenThemeComparison(token, tokens);
 
   const contents = {
     kind: "markdown",

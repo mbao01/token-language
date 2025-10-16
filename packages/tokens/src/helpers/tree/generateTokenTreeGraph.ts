@@ -1,7 +1,7 @@
 // TODO:: Use the HEIRARCHY TO GET THE RIGHT TOKENS HERE!!!
 
 import type { TokenGraph, TokenNode } from "@/token";
-import { isSameTheme } from "../token/isSameTheme";
+import { hasMatchingTheme } from "../token/hasMatchingTheme";
 
 /**
  * Formats a TokenNode into a TokenGraph structure.
@@ -11,7 +11,7 @@ import { isSameTheme } from "../token/isSameTheme";
  * @param {TokenNode} token - The token to format
  * @returns {Pick<TokenGraph, 'name' | 'attributes'>} Formatted token graph node
  */
-const formatToken = (token: TokenNode) => {
+const tokenToGraphNode = (token: TokenNode) => {
   return {
     name: token.name,
     attributes: {
@@ -62,7 +62,7 @@ const generateTokenDependencyGraph = (
 ) => {
   if (!token) return currentGraph;
 
-  const graph = { ...formatToken(token), children: [currentGraph] };
+  const graph = { ...tokenToGraphNode(token), children: [currentGraph] };
   const dependency = getTokenDependency(token, tokens);
 
   return generateTokenDependencyGraph(dependency, tokens, graph);
@@ -94,11 +94,11 @@ const generateTokenDependentGraph = (
     // if a token and an alias have the same name, assume any dependencies are mapped to the alias and not the token
     if (isTokenMappedToAliasWithSameName) return false;
 
-    return t.originalValue.toString().includes(`{!${token.name}}`) && isSameTheme(t, token);
+    return t.originalValue.toString().includes(`{!${token.name}}`) && hasMatchingTheme(t, token);
   });
 
   return {
-    ...formatToken(token),
+    ...tokenToGraphNode(token),
     ...(dependents.length > 0
       ? {
           children: dependents.map((t) =>

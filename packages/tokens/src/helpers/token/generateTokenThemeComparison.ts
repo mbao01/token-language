@@ -1,10 +1,10 @@
 import { type TokenNode } from "@/token";
-import { isSameName } from "./isSameName";
-import { isSamePlatform } from "./isSamePlatform";
-import { applyHeirarchyByTheme } from "../hierarchy/applyHeirarchyByTheme";
+import { hasMatchingName } from "./hasMatchingName";
+import { hasMatchingPlatform } from "./hasMatchingPlatform";
+import { organizeTokensByThemeHierarchy } from "../hierarchy";
 
 /**
- * Retrieves all theme variations of a given token by finding similar tokens across different themes.
+ * Generates a theme comparison matrix for a given token by finding similar tokens across different themes.
  * This function finds tokens with the same name and platform but different themes, then organizes 
  * them by theme and platform for comparison purposes.
  * 
@@ -29,7 +29,7 @@ import { applyHeirarchyByTheme } from "../hierarchy/applyHeirarchyByTheme";
  *   { name: "COLOR_PRIMARY", platform: "ios", theme: "light", ... },
  * ];
  * 
- * const comparison = getAllTokenThemes(primaryColorToken, allTokens);
+ * const comparison = generateTokenThemeComparison(primaryColorToken, allTokens);
  * // Returns:
  * // {
  * //   headers: ["theme", "web", "ios"],
@@ -40,7 +40,7 @@ import { applyHeirarchyByTheme } from "../hierarchy/applyHeirarchyByTheme";
  * // }
  * ```
  */
-export const getAllTokenThemes = (token: TokenNode, tokens: TokenNode[]) => {
+export const generateTokenThemeComparison = (token: TokenNode, tokens: TokenNode[]) => {
   type TokenTheme = {
     value: string;
     src: string;
@@ -49,18 +49,18 @@ export const getAllTokenThemes = (token: TokenNode, tokens: TokenNode[]) => {
   const tokenTheme: Record<string, TokenTheme> = {};
 
   const similarTokens = tokens.filter(
-    (t) => isSameName(t, token) && isSamePlatform(t, token)
+    (t) => hasMatchingName(t, token) && hasMatchingPlatform(t, token)
   );
 
   // similarTokens.forEach((t) => {
   //   const { value, originalValue } = t;
-  //   const key = getTokenThemeKey(t);
+  //   const key = generateTokenThemeId(t);
 
   //   const originalToken = tokens.find(
   //     (t) =>
   //       t._tokenType === "alias" &&
   //       `{!${t.name}}` === originalValue &&
-  //       isSameTheme(t, token)
+  //       hasMatchingTheme(t, token)
   //   );
   //   const tokenValue = originalToken?.value ?? value ?? "";
   //   // use inheritance here
@@ -73,7 +73,7 @@ export const getAllTokenThemes = (token: TokenNode, tokens: TokenNode[]) => {
   //   };
   // });
 
-  const { themes } = applyHeirarchyByTheme(undefined, similarTokens);
+  const { themes } = organizeTokensByThemeHierarchy(undefined, similarTokens);
 
   let headers: string[] = [];
   const content: Record<string, TokenNode | string>[] = [];

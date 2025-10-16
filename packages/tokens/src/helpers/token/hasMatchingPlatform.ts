@@ -29,28 +29,28 @@ import { TokenNode } from "@/token";
  *   // ... other properties
  * };
  * 
- * console.log(isSamePlatform(webToken, iosToken)); // false - different platforms
- * console.log(isSamePlatform(webToken, universalToken)); // true - universal token
- * console.log(isSamePlatform(iosToken, universalToken)); // true - universal token
+ * console.log(hasMatchingPlatform(webToken, iosToken)); // false - different platforms
+ * console.log(hasMatchingPlatform(webToken, universalToken)); // true - universal token
+ * console.log(hasMatchingPlatform(iosToken, universalToken)); // true - universal token
  * 
  * // Usage in filtering platform-compatible tokens
  * const compatibleTokens = allTokens.filter(token => 
- *   isSamePlatform(targetToken, token)
+ *   hasMatchingPlatform(targetToken, token)
  * );
  * 
  * // Usage in token inheritance scenarios
  * const inheritedTokens = tokens.filter(t => 
- *   isSamePlatform(baseToken, t) && t.name === baseToken.name
+ *   hasMatchingPlatform(baseToken, t) && t.name === baseToken.name
  * );
  * ```
  */
-export const isSamePlatform = (a: TokenNode, b: TokenNode) => {
-  return b.src.includes('all-platforms') || isStrictlySamePlatform(a, b);
+export const hasMatchingPlatform = (a: TokenNode, b: TokenNode) => {
+  return b.src.includes('all-platforms') || hasExactPlatformMatch(a, b);
 };
 
 /**
  * Strictly compares two tokens to determine if they have exactly the same platform.
- * Unlike `isSamePlatform`, this function does not consider universal tokens and
+ * Unlike `hasMatchingPlatform`, this function does not consider universal tokens and
  * requires an exact platform match.
  * 
  * @param {TokenNode} a - The first token to compare
@@ -63,12 +63,12 @@ export const isSamePlatform = (a: TokenNode, b: TokenNode) => {
  * const iosToken = { platform: "ios", src: "ios/colors" };
  * const universalWebToken = { platform: "web", src: "all-platforms/colors" };
  * 
- * console.log(isStrictlySamePlatform(webToken, iosToken)); // false
- * console.log(isStrictlySamePlatform(webToken, universalWebToken)); // true
- * console.log(isSamePlatform(webToken, universalWebToken)); // true
- * console.log(isSamePlatform(iosToken, universalWebToken)); // true (different from strict)
+ * console.log(hasExactPlatformMatch(webToken, iosToken)); // false
+ * console.log(hasExactPlatformMatch(webToken, universalWebToken)); // true
+ * console.log(hasMatchingPlatform(webToken, universalWebToken)); // true
+ * console.log(hasMatchingPlatform(iosToken, universalWebToken)); // true (different from strict)
  * ```
  */
-export const isStrictlySamePlatform = (a: TokenNode, b: TokenNode) => {
+export const hasExactPlatformMatch = (a: TokenNode, b: TokenNode) => {
   return a.platform === b.platform;
 };

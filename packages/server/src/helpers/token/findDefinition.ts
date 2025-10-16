@@ -3,7 +3,7 @@ import path from "path";
 import fg from "fast-glob";
 import { URI } from "vscode-uri";
 import { TokenLanguageSettings } from "../types";
-import { HIERARCHY } from "./hierarchy";
+import { PLATFORM_HIERARCHY_CONFIG } from "./hierarchy";
 
 export const findDefinition = async (
   token: any,
@@ -70,7 +70,7 @@ export const findDefinition = async (
           ],
         ];
 
-    const expectations = Object.entries(HIERARCHY)
+    const expectations = Object.entries(PLATFORM_HIERARCHY_CONFIG)
       .filter(([k, v]) =>
         keys.some((key) =>
           k.includes(key.filter(Boolean).join("_").toUpperCase())

@@ -14,7 +14,7 @@ import fs from "fs";
  * @example
  * ```typescript
  * // Load tokens from a file
- * const tokens = getTokensFromFile('/path/to/tokens/colors.json');
+ * const tokens = loadTokensFromFile('/path/to/tokens/colors.json');
  * 
  * if (tokens) {
  *   console.log(`Loaded ${tokens.length} tokens`);
@@ -37,7 +37,7 @@ import fs from "fs";
  * // ]
  * ```
  */
-export const getTokensFromFile = (filepath: string) => {
+export const loadTokensFromFile = (filepath: string) => {
   try {
     const data = fs.readFileSync(filepath, { encoding: "utf-8" });
     const tokens = JSON.parse(data);

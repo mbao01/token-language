@@ -11,9 +11,9 @@ import { documents } from "../../server/documents";
 import { connection } from "../../server/connection";
 import { findDefinition, getTokenAtPosition } from "../../helpers/token";
 import {
-  getClosestToken,
-  getTokensFromFile,
-  getTokenSrcAndCategory,
+  findMatchingToken,
+  loadTokensFromFile,
+  parseTokenFilePath,
 } from "tokens-utilities/helpers";
 import { getGlobalSettings } from "../../helpers/getDocumentSettings";
 
@@ -34,7 +34,7 @@ export const handleDefinition: ServerRequestHandler<
   const settings = getGlobalSettings();
   if (!settings.tokens.srcPackage) return [];
 
-  const { absoluteSrc, category } = getTokenSrcAndCategory(textDocument.uri);
+  const { absoluteSrc, category } = parseTokenFilePath(textDocument.uri);
 
   const { token: name, isDefinition } = getTokenAtPosition(doc, position);
   if (!(name && absoluteSrc && category)) return [];
@@ -46,10 +46,10 @@ export const handleDefinition: ServerRequestHandler<
     isDefinition,
   };
 
-  const tokens = getTokensFromFile(settings.tokens.json);
+  const tokens = loadTokensFromFile(settings.tokens.json);
   if (!tokens) return;
 
-  const token = getClosestToken({ query, tokens });
+  const token = findMatchingToken({ query, tokens });
   if (!token) return;
 
   const { definition } = await findDefinition(

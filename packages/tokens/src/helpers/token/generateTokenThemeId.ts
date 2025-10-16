@@ -1,12 +1,12 @@
 import { TokenNode } from "@/token";
 
 /**
- * Generates a unique theme key for a token based on its build name, theme, and mode.
+ * Generates a unique theme identifier for a token based on its build name, theme, and mode.
  * This function creates a composite identifier that can be used to group or identify
  * tokens that belong to the same theme configuration.
  * 
- * @param {TokenNode} token - The token to generate a theme key for
- * @returns {string} A unique theme key in the format "buildName-theme-mode"
+ * @param {TokenNode} token - The token to generate a theme identifier for
+ * @returns {string} A unique theme identifier in the format "buildName-theme-mode"
  * 
  * @example
  * ```typescript
@@ -18,17 +18,17 @@ import { TokenNode } from "@/token";
  *   // ... other properties
  * };
  * 
- * const themeKey = getTokenThemeKey(token);
- * console.log(themeKey); // "acme-us-brand-light"
+ * const themeId = generateTokenThemeId(token);
+ * console.log(themeId); // "acme-us-brand-light"
  * 
- * // Use theme keys to group tokens
+ * // Use theme IDs to group tokens
  * const tokensByTheme = {};
  * tokens.forEach(token => {
- *   const key = getTokenThemeKey(token);
- *   if (!tokensByTheme[key]) {
- *     tokensByTheme[key] = [];
+ *   const id = generateTokenThemeId(token);
+ *   if (!tokensByTheme[id]) {
+ *     tokensByTheme[id] = [];
  *   }
- *   tokensByTheme[key].push(token);
+ *   tokensByTheme[id].push(token);
  * });
  * 
  * // Example with default theme
@@ -38,9 +38,9 @@ import { TokenNode } from "@/token";
  *   mode: "dark",
  *   // ...
  * };
- * console.log(getTokenThemeKey(defaultToken)); // "default-default-dark"
+ * console.log(generateTokenThemeId(defaultToken)); // "default-default-dark"
  * ```
  */
-export const getTokenThemeKey = (token: TokenNode) => {
+export const generateTokenThemeId = (token: TokenNode) => {
   return `${token.buildName}-${token.theme}-${token.mode}`;
 };

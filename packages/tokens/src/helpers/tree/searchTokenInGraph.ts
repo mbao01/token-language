@@ -45,32 +45,32 @@ import type { TokenGraph, TokenNode } from "@/token";
  * };
  * 
  * // Find a token at the root level
- * const primaryColor = findTokenInGraph("COLOR_PRIMARY", tokenGraph);
+ * const primaryColor = searchTokenInGraph("COLOR_PRIMARY", tokenGraph);
  * console.log(primaryColor?.value); // "#007bff"
  * 
  * // Find a nested token
- * const buttonColor = findTokenInGraph("BUTTON_COLOR", tokenGraph);
+ * const buttonColor = searchTokenInGraph("BUTTON_COLOR", tokenGraph);
  * console.log(buttonColor?.originalValue); // "{!COLOR_PRIMARY}"
  * 
  * // Find a deeply nested token
- * const buttonBg = findTokenInGraph("PRIMARY_BUTTON_BG", tokenGraph);
+ * const buttonBg = searchTokenInGraph("PRIMARY_BUTTON_BG", tokenGraph);
  * console.log(buttonBg?.originalValue); // "{!BUTTON_COLOR}"
  * 
  * // Token not found
- * const notFound = findTokenInGraph("NONEXISTENT_TOKEN", tokenGraph);
+ * const notFound = searchTokenInGraph("NONEXISTENT_TOKEN", tokenGraph);
  * console.log(notFound); // null
  * 
  * // Usage in dependency analysis
  * const dependentTokens = [];
  * graph.children?.forEach(child => {
- *   const token = findTokenInGraph(child.name, tokenGraph);
+ *   const token = searchTokenInGraph(child.name, tokenGraph);
  *   if (token && token._tokenType === "alias") {
  *     dependentTokens.push(token);
  *   }
  * });
  * ```
  */
-export const findTokenInGraph = (
+export const searchTokenInGraph = (
   name: TokenNode["name"],
   graph: TokenGraph
 ): TokenNode | null => {
@@ -79,7 +79,7 @@ export const findTokenInGraph = (
   }
 
   for (let g of graph.children ?? []) {
-    const node = findTokenInGraph(name, g);
+    const node = searchTokenInGraph(name, g);
     if (node) {
       return node;
     }

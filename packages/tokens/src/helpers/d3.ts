@@ -8,7 +8,7 @@ import { ascending } from "d3-array";
 import { select } from "d3-selection";
 import { linkHorizontal } from "d3-shape";
 import { hierarchy, tree } from "d3-hierarchy";
-import { getTokenUniqueIdentifier } from "./token/getTokenUniqueIdentifier";
+import { generateTokenSlug } from "./token/generateTokenSlug";
 
 const WIDTH = 720;
 const DEVICE_SCALE_FACTOR = 2;
@@ -24,7 +24,7 @@ const DEVICE_SCALE_FACTOR = 2;
  * @returns {number} returns.width - The width of the generated SVG
  * @returns {number} returns.height - The height of the generated SVG
  */
-const createGraph = (graph: TokenGraph) => {
+const buildD3TreeVisualization = (graph: TokenGraph) => {
   // Compute the tree height; this approach will allow the height of the
   // SVG to scale according to the breadth (width) of the tree layout.
   const root = hierarchy<TokenGraph>(graph);
@@ -126,7 +126,7 @@ const createGraph = (graph: TokenGraph) => {
  * @returns {string} returns.timestampPath - Path for the timestamp file
  */
 const getTokenFilePaths = (graph: TokenGraph, rootDir: string) => {
-  const tokenIdentifier = getTokenUniqueIdentifier(graph.attributes);
+  const tokenIdentifier = generateTokenSlug(graph.attributes);
   const tmpDir = path.join(rootDir, "tmp", tokenIdentifier);
   const imagePath = path.join(tmpDir, "graph.png") as `${string}.png`;
   const smImagePath = path.join(tmpDir, "graph_small.png") as `${string}.png`;
@@ -150,7 +150,7 @@ const getTokenFilePaths = (graph: TokenGraph, rootDir: string) => {
  * @returns {Promise<string>} returns.filepath - Path to the generated small image
  * @returns {Promise<number>} returns.timestamp - Timestamp when the image was generated
  */
-const saveGraphToFile = async (
+const renderAndSaveGraph = async (
   svgString: string,
   graph: TokenGraph,
   rootDir: string,
@@ -230,12 +230,12 @@ const saveGraphToFile = async (
  *   ]
  * };
  * 
- * const result = await drawGraph(tokenGraph, '/project/output');
+ * const result = await generateTokenVisualization(tokenGraph, '/project/output');
  * console.log(`Graph saved to: ${result.filepath}`);
  * 
  * // Usage in documentation generation
  * const graphs = await Promise.all(
- *   tokenTrees.map(tree => drawGraph(tree, outputDirectory))
+ *   tokenTrees.map(tree => generateTokenVisualization(tree, outputDirectory))
  * );
  * 
  * graphs.forEach((result, index) => {
@@ -244,20 +244,20 @@ const saveGraphToFile = async (
  * 
  * // Usage with caching benefits
  * // First call generates the image
- * const firstCall = await drawGraph(complexGraph, '/cache');
+ * const firstCall = await generateTokenVisualization(complexGraph, '/cache');
  * 
  * // Second call returns cached version (much faster)
- * const secondCall = await drawGraph(complexGraph, '/cache');
+ * const secondCall = await generateTokenVisualization(complexGraph, '/cache');
  * 
  * // Integration with web applications
  * app.get('/token-graph/:tokenId', async (req, res) => {
  *   const tokenGraph = getTokenGraph(req.params.tokenId);
- *   const result = await drawGraph(tokenGraph, './public/images');
+ *   const result = await generateTokenVisualization(tokenGraph, './public/images');
  *   res.sendFile(path.resolve(result.filepath));
  * });
  * ```
  */
-export const drawGraph = async (graph: TokenGraph, rootDir: string) => {
+export const generateTokenVisualization = async (graph: TokenGraph, rootDir: string) => {
   const { timestampPath, smImagePath } = getTokenFilePaths(graph, rootDir);
   if (fs.existsSync(timestampPath) && fs.existsSync(smImagePath)) {
     // TODO:: read timestamp and check against build timestamp. If a build has occured, then proceed to generate image.
@@ -265,10 +265,10 @@ export const drawGraph = async (graph: TokenGraph, rootDir: string) => {
     return { filepath: smImagePath };
   }
 
-  const { node, width, height } = createGraph(graph);
+  const { node, width, height } = buildD3TreeVisualization(graph);
   // serialize the SVG
   const svgString = node?.outerHTML || "";
-  const { filepath } = await saveGraphToFile(svgString, graph, rootDir, {
+  const { filepath } = await renderAndSaveGraph(svgString, graph, rootDir, {
     width,
     height,
   });

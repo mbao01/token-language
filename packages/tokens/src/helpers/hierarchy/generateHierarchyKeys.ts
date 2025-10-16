@@ -25,7 +25,7 @@ import { TokenNode } from "@/token";
  *   // ... other properties
  * };
  * 
- * const webKeys = getHierarchyKeys(webToken);
+ * const webKeys = generateHierarchyKeys(webToken);
  * console.log(webKeys); // ["WEB_ACME_US_BRAND_LIGHT"]
  * 
  * // Universal token (all-platforms)
@@ -38,7 +38,7 @@ import { TokenNode } from "@/token";
  *   // ... other properties
  * };
  * 
- * const universalKeys = getHierarchyKeys(universalToken);
+ * const universalKeys = generateHierarchyKeys(universalToken);
  * console.log(universalKeys); // ["ACME_US", "ACME_US"]
  * 
  * // Custom theme universal token
@@ -47,17 +47,17 @@ import { TokenNode } from "@/token";
  *   theme: "brand"
  * };
  * 
- * const customKeys = getHierarchyKeys(customUniversalToken);
+ * const customKeys = generateHierarchyKeys(customUniversalToken);
  * console.log(customKeys); // ["ACME_US", "ACME_US_BRAND"]
  * 
  * // Usage in hierarchy matching
- * const keys = getHierarchyKeys(token);
+ * const keys = generateHierarchyKeys(token);
  * const matchingHierarchy = HIERARCHY_CONFIG.filter(hierarchy => 
  *   keys.some(key => hierarchy.name.includes(key))
  * );
  * ```
  */
-export const getHierarchyKeys = ({
+export const generateHierarchyKeys = ({
   platform,
   buildName,
   mode,

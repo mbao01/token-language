@@ -1,1 +1,1 @@
-export { applyHeirarchyByTheme } from "./applyHeirarchyByTheme";
+export { organizeTokensByThemeHierarchy } from "./organizeTokensByThemeHierarchy";

@@ -1,7 +1,7 @@
 import { TokenNode } from "@/token";
-import { HIERARCHY } from "../../constants/hierarchy";
-import { getTokenThemeKey } from "../token/getTokenThemeKey";
-import { getHierarchyKeys } from "./getHierarchyKeys";
+import { PLATFORM_HIERARCHY_CONFIG } from "../../constants/hierarchy";
+import { generateTokenThemeId } from "../token/generateTokenThemeId";
+import { generateHierarchyKeys } from "./generateHierarchyKeys";
 
 /**
  * Sorts tokens by hierarchy precedence based on their source paths and hierarchy configuration.
@@ -16,11 +16,11 @@ const sortTokensByHierarchy = (
   reference: TokenNode | undefined,
   tokens: TokenNode[]
 ) => {
-  const keys = reference ? getHierarchyKeys(reference) : undefined;
+  const keys = reference ? generateHierarchyKeys(reference) : undefined;
   const sortedTokens: Record<string, TokenNode> = {};
 
   tokens.forEach((token) => {
-    Object.entries(HIERARCHY).filter(([theme, hierarchy]) => {
+    Object.entries(PLATFORM_HIERARCHY_CONFIG).filter(([theme, hierarchy]) => {
       if (!keys || keys.some((key) => theme.includes(key))) {
         const sources = [...hierarchy].filter(Boolean);
         sources.forEach((src) => {
@@ -36,7 +36,7 @@ const sortTokensByHierarchy = (
 };
 
 /**
- * Applies hierarchy-based organization to tokens grouped by theme.
+ * Organizes tokens by theme configuration and applies hierarchy-based sorting.
  * This function takes a collection of tokens and organizes them first by theme configuration,
  * then applies hierarchy rules within each theme to determine precedence and platform-specific
  * token selection.
@@ -65,7 +65,7 @@ const sortTokensByHierarchy = (
  *   { ...referenceToken, platform: "web", src: "all-platforms/colors" }
  * ];
  * 
- * const organized = applyHeirarchyByTheme(referenceToken, similarTokens);
+ * const organized = organizeTokensByThemeHierarchy(referenceToken, similarTokens);
  * console.log(organized);
  * // Returns:
  * // {
@@ -82,7 +82,7 @@ const sortTokensByHierarchy = (
  * // }
  * 
  * // Usage in token comparison and selection
- * const { themes } = applyHeirarchyByTheme(baseToken, allVariations);
+ * const { themes } = organizeTokensByThemeHierarchy(baseToken, allVariations);
  * Object.entries(themes).forEach(([themeKey, platforms]) => {
  *   console.log(`Theme: ${themeKey}`);
  *   Object.entries(platforms).forEach(([platform, token]) => {
@@ -91,11 +91,11 @@ const sortTokensByHierarchy = (
  * });
  * 
  * // Usage in inheritance and fallback scenarios
- * const { themes } = applyHeirarchyByTheme(undefined, tokens);
+ * const { themes } = organizeTokensByThemeHierarchy(undefined, tokens);
  * const fallbackTokens = themes['default-default-light'] || {};
  * ```
  */
-export const applyHeirarchyByTheme = (
+export const organizeTokensByThemeHierarchy = (
   reference: TokenNode | undefined,
   tokens: TokenNode[]
 ) => {
@@ -104,7 +104,7 @@ export const applyHeirarchyByTheme = (
   const themesMap: Record<string, TokenNode[]> = {};
 
   tokens.forEach((token) => {
-    const theme = getTokenThemeKey(token);
+    const theme = generateTokenThemeId(token);
     themesMap[theme] = themesMap[theme] || [];
     themesMap[theme].push(token);
   });

@@ -8,7 +8,7 @@ type FindTokenArgs = {
 };
 
 /**
- * Finds the closest matching token based on name, source path, and category.
+ * Finds a matching token based on name, source path, and category.
  * This function can locate either a token definition directly or find the parent token
  * that an alias token references.
  * 
@@ -24,7 +24,7 @@ type FindTokenArgs = {
  * @example
  * ```typescript
  * // Find a token definition
- * const definitionToken = getClosestToken({
+ * const definitionToken = findMatchingToken({
  *   query: {
  *     name: "COLOR_PRIMARY",
  *     src: "colors/primary.json",
@@ -35,7 +35,7 @@ type FindTokenArgs = {
  * });
  * 
  * // Find an alias token that references another token
- * const aliasToken = getClosestToken({
+ * const aliasToken = findMatchingToken({
  *   query: {
  *     name: "BUTTON_COLOR",
  *     src: "components/button.json", 
@@ -46,7 +46,7 @@ type FindTokenArgs = {
  * });
  * ```
  */
-export const getClosestToken = ({ query, tokens }: FindTokenArgs) => {
+export const findMatchingToken = ({ query, tokens }: FindTokenArgs) => {
   const foundToken = tokens.find((t) => {
     const isNameFound = query.isDefinition
       ? t.name === query.name

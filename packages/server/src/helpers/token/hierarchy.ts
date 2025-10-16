@@ -20,7 +20,7 @@ const columns = [
   "UI w/PLATFORM ORG THEME & MODE",
 ];
 
-export const HIERARCHY: Record<string, string[]> = {
+export const PLATFORM_HIERARCHY_CONFIG: Record<string, string[]> = {
   WEB_DEFAULT_LIGHT: [
     "WEB_DEFAULT_LIGHT",
     "src/business/all-orgs/all-modes",

@@ -5,7 +5,7 @@ import {
   ReferenceParams,
   ServerRequestHandler,
 } from "vscode-languageserver/node";
-import { getTokenSrcAndCategory } from "tokens-utilities/helpers";
+import { parseTokenFilePath } from "tokens-utilities/helpers";
 import { findReferences, getTokenAtPosition } from "../../helpers/token";
 import { getGlobalSettings } from "../../helpers/getDocumentSettings";
 import { documents } from "../../server/documents";
@@ -23,7 +23,7 @@ export const handleReferences: ServerRequestHandler<
   const settings = getGlobalSettings();
   if (!settings.tokens.srcPackage) return [];
 
-  const { absoluteSrc, category } = getTokenSrcAndCategory(textDocument.uri);
+  const { absoluteSrc, category } = parseTokenFilePath(textDocument.uri);
 
   const { token: name } = getTokenAtPosition(doc, position);
   if (!(name && absoluteSrc && category)) return [];
