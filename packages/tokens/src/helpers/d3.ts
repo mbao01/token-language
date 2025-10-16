@@ -13,6 +13,17 @@ import { getTokenUniqueIdentifier } from "./token/getTokenUniqueIdentifier";
 const WIDTH = 720;
 const DEVICE_SCALE_FACTOR = 2;
 
+/**
+ * Creates an SVG visualization of a token dependency graph using D3.js.
+ * This internal function transforms a TokenGraph into a tree layout visualization
+ * with nodes representing tokens and links showing dependencies.
+ * 
+ * @param {TokenGraph} graph - The token graph to visualize
+ * @returns {Object} Object containing the SVG node and dimensions
+ * @returns {Element} returns.node - The SVG DOM element
+ * @returns {number} returns.width - The width of the generated SVG
+ * @returns {number} returns.height - The height of the generated SVG
+ */
 const createGraph = (graph: TokenGraph) => {
   // Compute the tree height; this approach will allow the height of the
   // SVG to scale according to the breadth (width) of the tree layout.
@@ -101,6 +112,19 @@ const createGraph = (graph: TokenGraph) => {
   return { node: svg.node(), width, height };
 };
 
+/**
+ * Generates file paths for storing token graph visualizations and metadata.
+ * This internal function creates standardized file paths for caching generated
+ * graph images and timestamps based on the token's unique identifier.
+ * 
+ * @param {TokenGraph} graph - The token graph to generate paths for
+ * @param {string} rootDir - The root directory for storing generated files
+ * @returns {Object} Object containing various file paths
+ * @returns {string} returns.tmpDir - Directory path for temporary files
+ * @returns {string} returns.imagePath - Path for the full-size PNG image
+ * @returns {string} returns.smImagePath - Path for the small/thumbnail PNG image  
+ * @returns {string} returns.timestampPath - Path for the timestamp file
+ */
 const getTokenFilePaths = (graph: TokenGraph, rootDir: string) => {
   const tokenIdentifier = getTokenUniqueIdentifier(graph.attributes);
   const tmpDir = path.join(rootDir, "tmp", tokenIdentifier);
@@ -111,6 +135,21 @@ const getTokenFilePaths = (graph: TokenGraph, rootDir: string) => {
   return { tmpDir, imagePath, smImagePath, timestampPath };
 };
 
+/**
+ * Saves an SVG graph visualization to PNG files using Puppeteer and image processing.
+ * This internal function converts the SVG string to high-quality PNG images in multiple sizes,
+ * stores metadata about the generation time, and returns file information.
+ * 
+ * @param {string} svgString - The SVG string to render as an image
+ * @param {TokenGraph} graph - The token graph being visualized
+ * @param {string} rootDir - The root directory for storing files
+ * @param {Object} dimensions - The dimensions of the SVG
+ * @param {number} dimensions.width - The width of the SVG
+ * @param {number} dimensions.height - The height of the SVG
+ * @returns {Promise<Object>} Promise resolving to file information
+ * @returns {Promise<string>} returns.filepath - Path to the generated small image
+ * @returns {Promise<number>} returns.timestamp - Timestamp when the image was generated
+ */
 const saveGraphToFile = async (
   svgString: string,
   graph: TokenGraph,
@@ -156,6 +195,68 @@ const saveGraphToFile = async (
   return { filepath: smImagePath, timestamp };
 };
 
+/**
+ * Generates or retrieves a cached PNG visualization of a token dependency graph.
+ * This function creates a visual representation of token relationships using D3.js
+ * for tree layout and renders it as a PNG image. It includes intelligent caching
+ * to avoid regenerating images unnecessarily.
+ * 
+ * @param {TokenGraph} graph - The token dependency graph to visualize
+ * @param {string} rootDir - The root directory where generated images should be stored
+ * @returns {Promise<Object>} Promise resolving to file information
+ * @returns {Promise<string>} returns.filepath - Path to the generated or cached image file
+ * 
+ * @example
+ * ```typescript
+ * // Basic usage with a token graph
+ * const tokenGraph = {
+ *   name: "COLOR_PRIMARY",
+ *   attributes: {
+ *     name: "COLOR_PRIMARY",
+ *     _tokenType: "alias",
+ *     value: "#007bff",
+ *     // ... other TokenNode properties
+ *   },
+ *   children: [
+ *     {
+ *       name: "BUTTON_BACKGROUND",
+ *       attributes: {
+ *         name: "BUTTON_BACKGROUND",
+ *         _tokenType: "alias",
+ *         originalValue: "{!COLOR_PRIMARY}",
+ *         // ... other properties
+ *       }
+ *     }
+ *   ]
+ * };
+ * 
+ * const result = await drawGraph(tokenGraph, '/project/output');
+ * console.log(`Graph saved to: ${result.filepath}`);
+ * 
+ * // Usage in documentation generation
+ * const graphs = await Promise.all(
+ *   tokenTrees.map(tree => drawGraph(tree, outputDirectory))
+ * );
+ * 
+ * graphs.forEach((result, index) => {
+ *   console.log(`Token ${index} graph: ${result.filepath}`);
+ * });
+ * 
+ * // Usage with caching benefits
+ * // First call generates the image
+ * const firstCall = await drawGraph(complexGraph, '/cache');
+ * 
+ * // Second call returns cached version (much faster)
+ * const secondCall = await drawGraph(complexGraph, '/cache');
+ * 
+ * // Integration with web applications
+ * app.get('/token-graph/:tokenId', async (req, res) => {
+ *   const tokenGraph = getTokenGraph(req.params.tokenId);
+ *   const result = await drawGraph(tokenGraph, './public/images');
+ *   res.sendFile(path.resolve(result.filepath));
+ * });
+ * ```
+ */
 export const drawGraph = async (graph: TokenGraph, rootDir: string) => {
   const { timestampPath, smImagePath } = getTokenFilePaths(graph, rootDir);
   if (fs.existsSync(timestampPath) && fs.existsSync(smImagePath)) {
