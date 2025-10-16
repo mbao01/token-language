@@ -1,6 +1,6 @@
 import { TokenNode } from "@/token";
-import { HIERARCHY } from "../constants/hierarchy";
-import { getThemeName } from "./getThemeName";
+import { HIERARCHY } from "../../constants/hierarchy";
+import { getTokenThemeKey } from "../token/getTokenThemeKey";
 import { getHierarchyKeys } from "./getHierarchyKeys";
 
 const sortTokensByHierarchy = (
@@ -35,7 +35,7 @@ export const applyHeirarchyByTheme = (
   const themesMap: Record<string, TokenNode[]> = {};
 
   tokens.forEach((token) => {
-    const theme = getThemeName(token);
+    const theme = getTokenThemeKey(token);
     themesMap[theme] = themesMap[theme] || [];
     themesMap[theme].push(token);
   });

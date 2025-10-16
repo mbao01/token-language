@@ -1,7 +1,7 @@
 // TODO:: Use the HEIRARCHY TO GET THE RIGHT TOKENS HERE!!!
 
 import type { TokenGraph, TokenNode } from "@/token";
-import { isSameTheme } from "./isSameTheme";
+import { isSameTheme } from "../token/isSameTheme";
 
 const formatToken = (token: TokenNode) => {
   return {
@@ -81,22 +81,4 @@ export const generateTokenTreeGraph = (
   );
 
   return tokenTree;
-};
-
-export const findTokenInGraph = (
-  name: TokenNode["name"],
-  graph: TokenGraph
-): TokenNode | null => {
-  if (graph.name === name) {
-    return graph.attributes;
-  }
-
-  for (let g of graph.children ?? []) {
-    const node = findTokenInGraph(name, g);
-    if (node) {
-      return node;
-    }
-  }
-
-  return null;
 };

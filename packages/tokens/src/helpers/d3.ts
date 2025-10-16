@@ -8,7 +8,7 @@ import { ascending } from "d3-array";
 import { select } from "d3-selection";
 import { linkHorizontal } from "d3-shape";
 import { hierarchy, tree } from "d3-hierarchy";
-import { getTokenUniqueIdentifier } from "./getTokenUniqueIdentifier";
+import { getTokenUniqueIdentifier } from "./token/getTokenUniqueIdentifier";
 
 const WIDTH = 720;
 const DEVICE_SCALE_FACTOR = 2;

@@ -1,11 +1,9 @@
 import { type TokenNode } from "@/token";
 import { isSameName } from "./isSameName";
 import { isSamePlatform } from "./isSamePlatform";
-import { isSameTheme } from "./isSameTheme";
-import { getThemeName } from "./getThemeName";
-import { applyHeirarchyByTheme } from "./applyHeirarchy";
+import { applyHeirarchyByTheme } from "../hierarchy/applyHeirarchyByTheme";
 
-export const getThemeComparison = (token: TokenNode, tokens: TokenNode[]) => {
+export const getAllTokenThemes = (token: TokenNode, tokens: TokenNode[]) => {
   type TokenTheme = {
     value: string;
     src: string;
@@ -19,7 +17,7 @@ export const getThemeComparison = (token: TokenNode, tokens: TokenNode[]) => {
 
   // similarTokens.forEach((t) => {
   //   const { value, originalValue } = t;
-  //   const key = getThemeName(t);
+  //   const key = getTokenThemeKey(t);
 
   //   const originalToken = tokens.find(
   //     (t) =>

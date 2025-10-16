@@ -5,10 +5,10 @@ import {
 } from "vscode-languageserver/node";
 import {
   drawGraph,
-  findToken,
+  getClosestToken,
   findTokenInGraph,
   generateTokenTreeGraph,
-  getThemeComparison,
+  getAllTokenThemes,
   getTokensFromFile,
   getTokenSrcAndCategory,
 } from "tokens-utilities/helpers";
@@ -49,7 +49,7 @@ export const handleHover: ServerRequestHandler<
   const tokens = getTokensFromFile(settings.tokens.json);
   if (!tokens) return;
 
-  const t = findToken({ query, tokens });
+  const t = getClosestToken({ query, tokens });
   if (!t) return;
 
   // TODO get token information from some tree!!
@@ -77,7 +77,7 @@ export const handleHover: ServerRequestHandler<
     { label: "Value", key: "value" },
     { label: "Source", key: "src" },
   ];
-  const comparison = getThemeComparison(token, tokens);
+  const comparison = getAllTokenThemes(token, tokens);
 
   const contents = {
     kind: "markdown",

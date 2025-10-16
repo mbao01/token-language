@@ -6,7 +6,13 @@ type FindTokenArgs = {
   };
   tokens: TokenNode[];
 };
-export const findToken = ({ query, tokens }: FindTokenArgs) => {
+
+/**
+ * 
+ * @param param0 This function locates a token by it's definition
+ * @returns the token itself (if a definition) or it's parent
+ */
+export const getClosestToken = ({ query, tokens }: FindTokenArgs) => {
   const foundToken = tokens.find((t) => {
     const isNameFound = query.isDefinition
       ? t.name === query.name

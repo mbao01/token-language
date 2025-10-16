@@ -11,7 +11,7 @@ import { documents } from "../../server/documents";
 import { connection } from "../../server/connection";
 import { findDefinition, getTokenAtPosition } from "../../helpers/token";
 import {
-  findToken,
+  getClosestToken,
   getTokensFromFile,
   getTokenSrcAndCategory,
 } from "tokens-utilities/helpers";
@@ -49,7 +49,7 @@ export const handleDefinition: ServerRequestHandler<
   const tokens = getTokensFromFile(settings.tokens.json);
   if (!tokens) return;
 
-  const token = findToken({ query, tokens });
+  const token = getClosestToken({ query, tokens });
   if (!token) return;
 
   const { definition } = await findDefinition(
