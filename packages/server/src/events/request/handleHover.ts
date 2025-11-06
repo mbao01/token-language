@@ -13,6 +13,7 @@ import {
   parseTokenFilePath,
   getColorMarkdown,
   Markdown,
+  getTokenExplorerLink,
 } from "tokens-utilities/helpers";
 import { getTokenAtPosition } from "../../helpers/token";
 import { getGlobalSettings } from "../../helpers/getDocumentSettings";
@@ -98,7 +99,7 @@ export const handleHover: ServerRequestHandler<
   markdown.table(comparison.headers, comparison.content);
   markdown.divider();
   markdown.next(
-    `[📘 Token explorer](https://code.visualstudio.com/api) [view image](${filepath})`
+    `[📘 View token explorer for ${token.name}](${getTokenExplorerLink(token)})`
   );
   markdown.next(`![${graph.name}](${filepath})`);
 

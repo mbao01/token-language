@@ -5,6 +5,7 @@ export { loadTokensFromFile } from "./loadTokensFromFile";
 export { parseTokenFilePath } from "./parseTokenFilePath";
 export { generateTokenThemeId } from "./generateTokenThemeId";
 export { getColorMarkdown } from "./getColorMarkdown";
+export { getTokenExplorerLink } from "./getTokenExplorerLink";
 export { hasColorValue } from "./hasColorValue";
 export { generateTokenSlug } from "./generateTokenSlug";
 export { hasMatchingName } from "./hasMatchingName";
