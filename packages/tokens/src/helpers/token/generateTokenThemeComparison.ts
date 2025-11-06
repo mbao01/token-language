@@ -2,18 +2,20 @@ import { type TokenNode } from "@/token";
 import { hasMatchingName } from "./hasMatchingName";
 import { hasMatchingPlatform } from "./hasMatchingPlatform";
 import { organizeTokensByThemeHierarchy } from "../hierarchy";
+import { getColorMarkdown } from "./getColorMarkdown";
+import { capitalize } from "../capitalize";
 
 /**
  * Generates a theme comparison matrix for a given token by finding similar tokens across different themes.
- * This function finds tokens with the same name and platform but different themes, then organizes 
+ * This function finds tokens with the same name and platform but different themes, then organizes
  * them by theme and platform for comparison purposes.
- * 
+ *
  * @param {TokenNode} token - The reference token to find theme variations for
  * @param {TokenNode[]} tokens - Array of all available tokens to search through
  * @returns {Object} An object containing headers and content for theme comparison
  * @returns {string[]} returns.headers - Array of headers including 'theme' and platform names
  * @returns {Record<string, TokenNode | string>[]} returns.content - Array of rows, each containing theme and platform-specific tokens
- * 
+ *
  * @example
  * ```typescript
  * const primaryColorToken = {
@@ -22,13 +24,13 @@ import { organizeTokensByThemeHierarchy } from "../hierarchy";
  *   theme: "light",
  *   // ... other properties
  * };
- * 
+ *
  * const allTokens = [
  *   primaryColorToken,
  *   { name: "COLOR_PRIMARY", platform: "web", theme: "dark", ... },
  *   { name: "COLOR_PRIMARY", platform: "ios", theme: "light", ... },
  * ];
- * 
+ *
  * const comparison = generateTokenThemeComparison(primaryColorToken, allTokens);
  * // Returns:
  * // {
@@ -40,7 +42,10 @@ import { organizeTokensByThemeHierarchy } from "../hierarchy";
  * // }
  * ```
  */
-export const generateTokenThemeComparison = (token: TokenNode, tokens: TokenNode[]) => {
+export const generateTokenThemeComparison = (
+  token: TokenNode,
+  tokens: TokenNode[]
+) => {
   type TokenTheme = {
     value: string;
     src: string;
@@ -76,19 +81,24 @@ export const generateTokenThemeComparison = (token: TokenNode, tokens: TokenNode
   const { themes } = organizeTokensByThemeHierarchy(undefined, similarTokens);
 
   let headers: string[] = [];
-  const content: Record<string, TokenNode | string>[] = [];
+  const content: Record<string, string>[] = [];
   Object.entries(themes).forEach(([theme, platformTokens]) => {
-    const row: Record<string, TokenNode | string> = { theme };
+    const row: Record<string, string> = {
+      theme: theme.replace("default-", ""),
+    };
     Object.entries(platformTokens).forEach(([platform, t]) => {
       headers.push(platform);
-      row[platform] = t;
+      row[platform] = getColorMarkdown(t.value);
     });
     content.push(row);
   });
-  headers = ["theme", ...new Set(headers)];
+  const headersList = ["theme", ...new Set(headers)].map((header) => ({
+    label: capitalize(header),
+    key: header,
+  }));
 
   const comparison = {
-    headers,
+    headers: headersList,
     content,
   };
 

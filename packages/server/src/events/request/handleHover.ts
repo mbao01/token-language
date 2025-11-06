@@ -11,6 +11,8 @@ import {
   generateTokenThemeComparison,
   loadTokensFromFile,
   parseTokenFilePath,
+  getColorMarkdown,
+  Markdown,
 } from "tokens-utilities/helpers";
 import { getTokenAtPosition } from "../../helpers/token";
 import { getGlobalSettings } from "../../helpers/getDocumentSettings";
@@ -25,9 +27,7 @@ export const handleHover: ServerRequestHandler<
   const doc = documents.get(params.textDocument.uri);
   if (!doc) return;
 
-  const { absoluteSrc, category } = parseTokenFilePath(
-    params.textDocument.uri
-  );
+  const { absoluteSrc, category } = parseTokenFilePath(params.textDocument.uri);
 
   const {
     token: name,
@@ -54,19 +54,27 @@ export const handleHover: ServerRequestHandler<
 
   // TODO get token information from some tree!!
   const graph = generateTokenTreeGraph(t, tokens);
-  const { filepath } = await generateTokenVisualization(graph, settings.tokens.srcPackage);
+  const { filepath } = await generateTokenVisualization(
+    graph,
+    settings.tokens.srcPackage
+  );
   const token = searchTokenInGraph(query.name, graph);
 
   if (!token) return;
 
-  const content = tokens.filter(
-    (_t) =>
-      _t.src === token.src &&
-      _t.name === token.name &&
-      _t.mode === token.mode &&
-      _t.theme === token.theme &&
-      _t.category === token.category
-  );
+  const content = tokens
+    .filter(
+      (_t) =>
+        _t.src === token.src &&
+        _t.name === token.name &&
+        _t.mode === token.mode &&
+        _t.theme === token.theme &&
+        _t.category === token.category
+    )
+    .map((t) => ({
+      ...t,
+      value: getColorMarkdown(t.value),
+    }));
 
   const headers = [
     { label: "Platform", key: "platform" },
@@ -79,37 +87,24 @@ export const handleHover: ServerRequestHandler<
   ];
   const comparison = generateTokenThemeComparison(token, tokens);
 
+  const markdown = new Markdown();
+  markdown.header(`🎨 \`${query.name}\` (${token._tokenType})`, 4);
+  markdown.divider();
+  markdown.break();
+  markdown.table(headers, content);
+  markdown.divider();
+  markdown.break();
+  markdown.header(`📊 Theme comparison across platforms`, 4);
+  markdown.table(comparison.headers, comparison.content);
+  markdown.divider();
+  markdown.next(
+    `[📘 Token explorer](https://code.visualstudio.com/api) [view image](${filepath})`
+  );
+  markdown.next(`![${graph.name}](${filepath})`);
+
   const contents = {
     kind: "markdown",
-    value: [
-      `#### 🎨 \`${query.name}\` (${token._tokenType})`,
-      `---`,
-      `\n`,
-      `| ${headers.map(({ label }) => label).join("\t | ")} |`,
-      `|${headers.map(() => ":----------").join(" | ")}|`,
-      content
-        .map((row) => `| ${headers.map(({ key }) => row[key]).join(" | ")} | `)
-        .join("\n"),
-      ``,
-      `---`,
-      ``,
-      `| ${comparison.headers.join(" | ")} |`,
-      `|${comparison.headers.map(() => ":----------").join("|")}|`,
-      comparison.content
-        .map(
-          (row) =>
-            `| ${comparison.headers
-              .map((header) => row[header]?.value ?? row[header] ?? "-")
-              .join(" | ")} |`
-        )
-        .join("\n"),
-      ``,
-      `---`,
-      `[📘 Token explorer](https://code.visualstudio.com/api) [view image](${filepath})`,
-      ``,
-      `![${graph.name}](${filepath})`,
-      ``,
-    ].join("\n"),
+    value: markdown.toString(),
   } as const;
 
   return {
