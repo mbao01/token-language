@@ -3,7 +3,7 @@ import path from "path";
 import fg from "fast-glob";
 import { URI } from "vscode-uri";
 import { TokenLanguageSettings } from "../types";
-import { PLATFORM_HIERARCHY_CONFIG } from "./hierarchy";
+import { PLATFORM_HIERARCHY_CONFIG } from "tokens-utilities/constants";
 
 export const findDefinition = async (
   token: any,

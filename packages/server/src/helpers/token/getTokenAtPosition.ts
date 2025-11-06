@@ -1,5 +1,6 @@
 import { Position, Range } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { TOKEN_DEFINITION_REGEX, TOKEN_VALUE_REGEX } from "tokens-utilities/constants";
 
 const findTokenMatch = ({
   line,
@@ -37,12 +38,10 @@ export const getTokenAtPosition = (
     end: { line: position.line + 1, character: 0 },
   });
 
-  const tokenValueRegex = /\{!?([A-Z0-9_]{2,})\}/g;
-  const tokenDefinitionRegex = /"([A-Z0-9_]{2,})"/g;
 
   let result = findTokenMatch({
     line,
-    regex: tokenDefinitionRegex,
+    regex: TOKEN_DEFINITION_REGEX,
     position,
   });
 
@@ -52,7 +51,7 @@ export const getTokenAtPosition = (
 
   result = findTokenMatch({
     line,
-    regex: tokenValueRegex,
+    regex: TOKEN_VALUE_REGEX,
     position,
   });
 

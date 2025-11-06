@@ -48,6 +48,10 @@ export function activate(context: ExtensionContext) {
       // Notify the server about file changes to '.clientrc files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher("**/tokens/*.json"),
     },
+    markdown: {
+      isTrusted: true,
+      supportHtml: true,
+    },
   };
 
   // Create the language client and start the client.

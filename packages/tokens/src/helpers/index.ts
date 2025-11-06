@@ -1,3 +1,4 @@
 export * from "./token";
+export * from "./transformers";
 export * from "./tree";
 export { generateTokenVisualization } from "./d3";
