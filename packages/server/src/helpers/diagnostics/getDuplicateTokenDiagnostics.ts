@@ -11,6 +11,7 @@ import type { CapabilitiesOptions } from "../types";
 import {
   colorToFnRGBA,
   findMatchingThemeTokens,
+  getTokenDiagnosticsLink,
   hasColorValue,
   hasMatchingName,
   hasMatchingTheme,
@@ -202,11 +203,12 @@ export const getDuplicateTokenDiagnostics = async (
 
     if (!duplicates.length) continue;
 
+    const code = "duplicate-token";
     const diagnostic: Diagnostic = {
+      code,
       severity: DiagnosticSeverity.Information,
-      code: "duplicate-token",
       codeDescription: {
-        href: "https://example.com/docs/diagnostics/duplicate-token",
+        href: getTokenDiagnosticsLink(code),
       },
       data: "Some data",
       range: {

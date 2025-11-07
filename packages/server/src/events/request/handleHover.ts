@@ -99,7 +99,7 @@ export const handleHover: ServerRequestHandler<
   markdown.table(comparison.headers, comparison.content);
   markdown.divider();
   markdown.next(
-    `[📘 View token explorer for ${token.name}](${getTokenExplorerLink(token)})`
+    `[📘 View token in the explorer](${getTokenExplorerLink(token)})`
   );
   markdown.next(`![${graph.name}](${filepath})`);
 

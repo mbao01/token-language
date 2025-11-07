@@ -7,6 +7,7 @@ import { TOKEN_VALUE_REGEX } from "tokens-utilities/constants";
 import type { CapabilitiesOptions } from "../types";
 import {
   findMatchingThemeTokens,
+  getTokenDiagnosticsLink,
   parseTokenFilePath,
 } from "tokens-utilities/helpers";
 import type { TokenNode } from "tokens-utilities/types";
@@ -17,11 +18,11 @@ export const getValueTokenDiagnostics = async (
   options?: CapabilitiesOptions
 ) => {
   const text = textDocument.getText();
-  let m: RegExpExecArray | null;
+  let match: RegExpExecArray | null;
   const diagnostics: Diagnostic[] = [];
 
-  while ((m = TOKEN_VALUE_REGEX.exec(text))) {
-    const name = m[1];
+  while ((match = TOKEN_VALUE_REGEX.exec(text))) {
+    const name = match[1];
 
     const { absoluteSrc, category } = parseTokenFilePath(textDocument.uri);
 
@@ -38,18 +39,19 @@ export const getValueTokenDiagnostics = async (
 
     if (exists) continue;
 
+    const code = "missing-token";
     const diagnostic: Diagnostic = {
+      code,
       severity: DiagnosticSeverity.Error,
-      code: "missing-token",
       codeDescription: {
-        href: "https://example.com/docs/diagnostics/missing-token",
+        href: getTokenDiagnosticsLink(code),
       },
       data: "Some data",
       range: {
-        start: textDocument.positionAt(m.index),
-        end: textDocument.positionAt(m.index + m[0].length),
+        start: textDocument.positionAt(match.index),
+        end: textDocument.positionAt(match.index + match[0].length),
       },
-      message: `'${m[1]}' is not a valid token/alias.`,
+      message: `'${match[1]}' is not a valid token/alias.\nTo fix the error, replace please replace '${match[0]}' with a valid token or alias that exists in the token set.`,
       source: "IntelliTokens",
     };
     if (options?.hasDiagnosticRelatedInformationCapability) {
