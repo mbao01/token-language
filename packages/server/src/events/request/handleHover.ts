@@ -63,25 +63,27 @@ export const handleHover: ServerRequestHandler<
 
   if (!token) return;
 
+  // only show tokens with the same name, category, mode, theme and buildName
   const content = tokens
     .filter(
       (_t) =>
-        _t.src === token.src &&
         _t.name === token.name &&
         _t.mode === token.mode &&
         _t.theme === token.theme &&
+        _t.buildName === token.buildName &&
         _t.category === token.category
     )
     .map((t) => ({
       ...t,
       value: getColorMarkdown(t.value),
-    }));
+    }))
+    .sort((a, b) => a.platform.localeCompare(b.platform));
 
   const headers = [
     { label: "Platform", key: "platform" },
     { label: "Type", key: "type" },
     { label: "Category", key: "category" },
-    { label: "Theme", key: "buildTheme" },
+    { label: "Theme", key: "buildName" },
     { label: "Mode", key: "mode" },
     { label: "Value", key: "value" },
     { label: "Source", key: "src" },

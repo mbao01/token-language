@@ -40,9 +40,9 @@ import { findLocationInSource } from "../token/findLocationInSource";
  *   document,
  *   { hasDiagnosticRelatedInformationCapability: true }
  * );
- * 
+ *
  * console.log(`Found ${diagnostics.length} duplicate token issues`);
- * 
+ *
  * // Example diagnostic output for duplicate color values
  * // {
  * //   severity: DiagnosticSeverity.Information,
@@ -66,7 +66,7 @@ import { findLocationInSource } from "../token/findLocationInSource";
  *       document,
  *       clientCapabilities
  *     );
- *     
+ *
  *     // Send diagnostics to client
  *     connection.sendDiagnostics({
  *       uri: document.uri,
@@ -85,14 +85,14 @@ import { findLocationInSource } from "../token/findLocationInSource";
  *     theme: "light"
  *   },
  *   {
- *     name: "COLOR_PRIMARY", 
+ *     name: "COLOR_PRIMARY",
  *     value: "#007bff", // Same value - will be flagged as duplicate
  *     src: "ui/mobile",
- *     category: "colors", 
+ *     category: "colors",
  *     theme: "light"
  *   }
  * ];
- * 
+ *
  * const diagnostics = await getDuplicateTokenDiagnostics(
  *   colorTokens,
  *   document
@@ -110,7 +110,7 @@ import { findLocationInSource } from "../token/findLocationInSource";
  *   {
  *     name: "BUTTON_COLOR",
  *     originalValue: "{!COLOR_PRIMARY}", // Same reference - duplicate
- *     src: "components/mobile", 
+ *     src: "components/mobile",
  *     category: "button"
  *   }
  * ];
@@ -119,7 +119,7 @@ import { findLocationInSource } from "../token/findLocationInSource";
  * const validateTokenFile = async (filePath: string) => {
  *   const document = TextDocument.create(filePath, 'json', 1, fileContent);
  *   const diagnostics = await getDuplicateTokenDiagnostics(allTokens, document);
- *   
+ *
  *   if (diagnostics.length > 0) {
  *     console.error(`❌ Found ${diagnostics.length} duplicate token issues in ${filePath}`);
  *     diagnostics.forEach(d => console.error(`  - ${d.message}`));
@@ -175,9 +175,15 @@ export const getDuplicateTokenDiagnostics = async (
       isValueMatching: boolean;
       isOriginalValueMatching: boolean;
     }[] = [];
+    const unused: {
+      token: TokenNode;
+      isUnusedAlias: true;
+    }[] = [];
 
     Object.entries(allThemeTokens).forEach(([theme, tokens]) => {
       const token = themeTokenMap[theme];
+
+      let isUsedAlias = false;
 
       tokens.forEach((t) => {
         if (!(hasMatchingName(t, token) && hasMatchingTheme(t, token))) {
@@ -197,51 +203,102 @@ export const getDuplicateTokenDiagnostics = async (
                 isOriginalValueMatching,
               });
           }
+
+          // checking for unused aliases
+          if (token._tokenType === "alias" && t.src === token.src) {
+            if (t.originalValue.includes(`{!${token.name}}`)) {
+              isUsedAlias = true;
+            }
+          }
         }
       });
+
+      if (!isUsedAlias) {
+        unused.push({
+          token,
+          isUnusedAlias: true,
+        });
+      }
     });
 
-    if (!duplicates.length) continue;
+    if (duplicates.length) {
+      const code = "duplicate-token";
+      const diagnostic: Diagnostic = {
+        code,
+        severity: DiagnosticSeverity.Information,
+        codeDescription: {
+          href: getTokenDiagnosticsLink(code),
+        },
+        data: "Some data",
+        range: {
+          start: textDocument.positionAt(index),
+          end: textDocument.positionAt(index + found.length),
+        },
+        message: `Duplicates found for '${name}'. Please ensure token values are unique.`,
+        source: "IntelliTokens",
+      };
 
-    const code = "duplicate-token";
-    const diagnostic: Diagnostic = {
-      code,
-      severity: DiagnosticSeverity.Information,
-      codeDescription: {
-        href: getTokenDiagnosticsLink(code),
-      },
-      data: "Some data",
-      range: {
-        start: textDocument.positionAt(index),
-        end: textDocument.positionAt(index + found.length),
-      },
-      message: `Duplicates found for '${name}'. Please ensure token values are unique.`,
-      source: "IntelliTokens",
-    };
+      if (options?.hasDiagnosticRelatedInformationCapability) {
+        diagnostic.relatedInformation = duplicates
+          .map(({ token, isValueMatching, isOriginalValueMatching }) => {
+            const location = findLocationInSource(token, { isDefinition });
 
-    if (options?.hasDiagnosticRelatedInformationCapability) {
-      diagnostic.relatedInformation = duplicates
-        .map(({ token, isValueMatching, isOriginalValueMatching }) => {
-          const location = findLocationInSource(token, { isDefinition });
+            if (!location) return;
 
-          if (!location) return;
+            return {
+              location,
+              message: [
+                "",
+                `Value: ${token.value} ${
+                  isValueMatching ? "❌ duplicate" : ""
+                }`,
+                `Original value: ${token.originalValue} ${
+                  isOriginalValueMatching ? "❌ duplicate" : ""
+                }`,
+                `Is a definition? ${query.isDefinition}`,
+              ].join("\n"),
+            };
+          })
+          .filter(Boolean) as Diagnostic["relatedInformation"];
+      }
 
-          return {
-            location,
-            message: [
-              "",
-              `Value: ${token.value} ${isValueMatching ? "❌ duplicate" : ""}`,
-              `Original value: ${token.originalValue} ${
-                isOriginalValueMatching ? "❌ duplicate" : ""
-              }`,
-              `Is a definition? ${query.isDefinition}`,
-            ].join("\n"),
-          };
-        })
-        .filter(Boolean) as Diagnostic["relatedInformation"];
+      diagnostics.push(diagnostic);
     }
 
-    diagnostics.push(diagnostic);
+    if (unused.length) {
+      const code = "unused-alias";
+      const diagnostic: Diagnostic = {
+        code,
+        severity: DiagnosticSeverity.Warning,
+        codeDescription: {
+          href: getTokenDiagnosticsLink(code),
+        },
+        data: "Some data",
+        range: {
+          start: textDocument.positionAt(index),
+          end: textDocument.positionAt(index + found.length),
+        },
+        message: `Unused alias found for '${name}'. Consider removing it if not needed.`,
+        source: "IntelliTokens",
+      };
+
+      if (options?.hasDiagnosticRelatedInformationCapability) {
+        diagnostic.relatedInformation = unused
+          .map(({ token }) => {
+            const location = findLocationInSource(token, { isDefinition });
+
+            if (!location) return;
+
+            return {
+              location,
+              message: `Alias defined at ${token.src}/${token.category}.json is not used.`,
+            };
+          })
+          .filter(Boolean) as Diagnostic["relatedInformation"];
+      }
+
+      diagnostics.push(diagnostic);
+    }
   }
 
   return diagnostics;

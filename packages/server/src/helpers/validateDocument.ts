@@ -62,7 +62,7 @@ export const validateTextDocument = async (
   // let m: RegExpExecArray | null;
 
   // PREPARATORY
-  // 1. Create an array of different types of diagnostics (e.g missing token, duplicate token, mismatched type, etc)
+  // 1. Create an array of different types of diagnostics (e.g semantic diagnostics (missing token, duplicate token, mismatched alias/token type, unused aliases), syntax diagnostics, etc)
 
   // STEPS
   // 1. Read all the value tokens (i.e {!<VALUE_TOKEN>}) in the file
