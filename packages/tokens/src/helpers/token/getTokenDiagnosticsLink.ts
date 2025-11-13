@@ -60,7 +60,7 @@ type DiagnosticCode =
  * ```
  */
 export const getTokenDiagnosticsLink = (code: DiagnosticCode): string => {
-  const diagnosticsUrl = `https://docs.ci.nutmeg.co.uk/nutkit/jpmx/latest/?path=/story/guidelines-tokens-diagnostics--${code}`;
+  const diagnosticsUrl = `https://docs.ci.nutmeg.co.uk/nutkit/jpmx/vno-jira-intelli-tokens/?path=/story/guidelines-tokens-diagnostics--${code}`;
 
   return diagnosticsUrl;
 };
