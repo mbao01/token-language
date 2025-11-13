@@ -206,16 +206,20 @@ export const getAliasTokenDiagnostics = async (
     // TODO:: confirm this - using the name of the file to check if it is an alias
     const isAlias = token.category.startsWith("aliases");
     let isUsedAlias = false;
-    const { descendantPaths } = getSourceHierarchyPaths(token);
+    const { ancestorPaths, descendantPaths } = getSourceHierarchyPaths(token);
 
     tokens.forEach((t) => {
       if (!(hasMatchingName(t, token) && hasMatchingTheme(t, token))) {
-        const isSrcInHierarchy = Object.values(descendantPaths).some((paths) =>
-          paths.some((p) => convertSrcToPath(t.src) === p)
-        );
+        const isSrcInHierarchy =
+          Object.values(descendantPaths).some((paths) =>
+            paths.some((p) => convertSrcToPath(t.src) === p)
+          ) ||
+          Object.values(ancestorPaths).some((paths) =>
+            paths.some((p) => convertSrcToPath(t.src) === p)
+          );
 
         if (isAlias && (isSrcInHierarchy || t.src === token.src)) {
-          if (t.originalValue.includes(`{!${token.name}}`)) {
+          if (t.originalValue?.toString().includes(`{!${token.name}}`)) {
             isUsedAlias = true;
           }
         }

@@ -34,7 +34,7 @@ const getTokenDependency = (token: TokenNode, tokens: TokenNode[]) => {
     (t) => {
       // Ensure we don't match the token itself in case of circular references
       const isSameTokenReferenced = (
-        t.originalValue.toString() === `{!${token.name}}` &&
+        t.originalValue?.toString() === `{!${token.name}}` &&
         t._tokenType === token._tokenType
       );
 
@@ -94,7 +94,7 @@ const generateTokenDependentGraph = (
     // if a token and an alias have the same name, assume any dependencies are mapped to the alias and not the token
     if (isTokenMappedToAliasWithSameName) return false;
 
-    return t.originalValue.toString().includes(`{!${token.name}}`) && hasMatchingTheme(t, token);
+    return t.originalValue?.toString().includes(`{!${token.name}}`) && hasMatchingTheme(t, token);
   });
 
   return {
