@@ -5,16 +5,12 @@ import { getGlobalSettings } from "./getDocumentSettings";
 import type { CapabilitiesOptions } from "./types";
 import { getValueTokenDiagnostics } from "./diagnostics/getValueTokenDiagnostics";
 import { loadTokensFromFile } from "tokens-utilities/helpers";
-import { getAliasTokenDiagnostics, getDuplicateTokenDiagnostics } from "./diagnostics";
+import {
+  getAliasTokenDiagnostics,
+  getDuplicateTokenDiagnostics,
+  getInvalidTokenDiagnostics,
+} from "./diagnostics";
 import { connection } from "../server/connection";
-
-// 1. create a function that generates a missing token diagnostic
-
-// 2. create a function that generates a duplicate token diagnostic
-
-// 3. create a function that generates a mismatched type diagnostic
-
-// 4. create a function that generates a duplicate token value diagnostic
 
 export const validateTextDocument = async (
   textDocument: TextDocument,
@@ -27,7 +23,9 @@ export const validateTextDocument = async (
     return diagnostics;
   }
 
-  if (!textDocument.uri.includes(path.join(settings.tokens.srcPackage, "src"))) {
+  if (
+    !textDocument.uri.includes(path.join(settings.tokens.srcPackage, "src"))
+  ) {
     return diagnostics;
   }
 
@@ -62,18 +60,17 @@ export const validateTextDocument = async (
   );
   diagnostics.push(...aliasTokenDiagnostics);
 
+  // invalid token diagnostics
+  const invalidTokenDiagnostics = await getInvalidTokenDiagnostics(
+    textDocument,
+    options
+  );
+  diagnostics.push(...invalidTokenDiagnostics);
+
   return diagnostics;
 
-  // In this simple example we get the settings for every validate run.
-  // const settings = await getDocumentSettings(textDocument.uri, options);
-
-  // The validator creates diagnostics for all uppercase words length 2 and more
-  // const text = textDocument.getText();
-  // const pattern = /\b[A-Z]{2,}\b/g;
-  // let m: RegExpExecArray | null;
-
   // PREPARATORY
-  // 1. Create an array of different types of diagnostics (e.g semantic diagnostics (missing token, duplicate token, mismatched alias/token type, unused aliases), syntax diagnostics, etc)
+  // 1. Create an array of different types of diagnostics (e.g semantic diagnostics (missing token, duplicate token ✅, mismatched alias/token type, unused aliases✅), syntax diagnostics, etc)
 
   // STEPS
   // 1. Read all the value tokens (i.e {!<VALUE_TOKEN>}) in the file
@@ -91,40 +88,4 @@ export const validateTextDocument = async (
   // ensure that there are no duplicate keys in the document. i.e two tokens with the same key name
 
   // ensure that token resolved values are not the same i.e duplicate token values
-
-  // let problems = 0;
-  // const diagnostics: Diagnostic[] = [];
-  // while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-  //   problems++;
-  //   const diagnostic: Diagnostic = {
-  //     severity: DiagnosticSeverity.Warning,
-  //     range: {
-  //       start: textDocument.positionAt(m.index),
-  //       // end: textDocument.positionAt(Number.MAX_VALUE),
-  //       end: textDocument.positionAt(m.index + m[0].length),
-  //     },
-  //     message: `${m[0]} is all uppercase.`,
-  //     source: "ex",
-  //   };
-  //   if (options?.hasDiagnosticRelatedInformationCapability) {
-  //     diagnostic.relatedInformation = [
-  //       {
-  //         location: {
-  //           uri: textDocument.uri,
-  //           range: Object.assign({}, diagnostic.range),
-  //         },
-  //         message: "Spelling matters",
-  //       },
-  //       {
-  //         location: {
-  //           uri: textDocument.uri,
-  //           range: Object.assign({}, diagnostic.range),
-  //         },
-  //         message: "Particularly for names",
-  //       },
-  //     ];
-  //   }
-  //   diagnostics.push(diagnostic);
-  // }
-  // return diagnostics;
 };
