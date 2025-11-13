@@ -19,11 +19,11 @@ import { getGlobalSettings } from "../getDocumentSettings";
  * const text = "Hello\nWorld\nExample";
  * const position = indexToPosition(text, 8); // Points to 'r' in "World"
  * console.log(position); // { line: 1, character: 2 }
- * 
+ *
  * // Start of text
  * const start = indexToPosition(text, 0);
  * console.log(start); // { line: 0, character: 0 }
- * 
+ *
  * // After first newline
  * const afterNewline = indexToPosition(text, 6);
  * console.log(afterNewline); // { line: 1, character: 0 }
@@ -67,7 +67,7 @@ const indexToPosition = (text: string, index: number): Position => {
  *   category: "colors",
  *   // ... other properties
  * };
- * 
+ *
  * const location = findLocationInSource(tokenDefinition, { isDefinition: true });
  * if (location) {
  *   console.log(`Found at: ${location.uri}`);
@@ -79,12 +79,12 @@ const indexToPosition = (text: string, index: number): Position => {
  * // Find a token reference (alias usage)
  * const aliasToken = {
  *   name: "BUTTON_COLOR",
- *   src: "components/web", 
+ *   src: "components/web",
  *   category: "button",
  *   originalValue: "{!COLOR_PRIMARY}",
  *   // ... other properties
  * };
- * 
+ *
  * const refLocation = findLocationInSource(aliasToken, { isDefinition: false });
  * // Searches for "{!BUTTON_COLOR" pattern instead of "BUTTON_COLOR" definition
  *
@@ -113,21 +113,21 @@ const indexToPosition = (text: string, index: number): Position => {
  * // Usage in find references
  * const findTokenReferences = (baseToken: TokenNode, allTokens: TokenNode[]) => {
  *   const references = [];
- *   
+ *
  *   allTokens.forEach(token => {
  *     if (token.originalValue.includes(`{!${baseToken.name}}`)) {
  *       const location = findLocationInSource(token, { isDefinition: false });
  *       if (location) references.push(location);
  *     }
  *   });
- *   
+ *
  *   return references;
  * };
  * ```
  */
 
 export const findLocationInSource = (
-  token: TokenNode,
+  token: Pick<TokenNode, "src" | "category" | "name">,
   { isDefinition }: { isDefinition: boolean }
 ) => {
   const settings = getGlobalSettings();

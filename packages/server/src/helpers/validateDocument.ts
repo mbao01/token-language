@@ -5,7 +5,7 @@ import { getDocumentSettings, getGlobalSettings } from "./getDocumentSettings";
 import type { CapabilitiesOptions } from "./types";
 import { getValueTokenDiagnostics } from "./diagnostics/getValueTokenDiagnostics";
 import { loadTokensFromFile } from "tokens-utilities/helpers";
-import { getDuplicateTokenDiagnostics } from "./diagnostics";
+import { getAliasTokenDiagnostics, getDuplicateTokenDiagnostics } from "./diagnostics";
 
 // 1. create a function that generates a missing token diagnostic
 
@@ -50,6 +50,14 @@ export const validateTextDocument = async (
     options
   );
   diagnostics.push(...duplicateTokenDiagnostics);
+
+  // get alias token diagnostics
+  const aliasTokenDiagnostics = await getAliasTokenDiagnostics(
+    tokens,
+    textDocument,
+    options
+  );
+  diagnostics.push(...aliasTokenDiagnostics);
 
   return diagnostics;
 

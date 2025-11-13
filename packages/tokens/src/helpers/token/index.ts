@@ -1,9 +1,11 @@
-export { generateTokenThemeComparison } from "./generateTokenThemeComparison";
-export { findMatchingToken } from "./findMatchingToken";
+export { convertSrcToPath } from "./convertSrcToPath";
 export { findMatchingThemeTokens } from "./findMatchingThemeTokens";
+export { findMatchingToken } from "./findMatchingToken";
+export { getSourceHierarchyPaths } from "./getSourceHierarchyPaths";
 export { loadTokensFromFile } from "./loadTokensFromFile";
 export { parseTokenFilePath } from "./parseTokenFilePath";
 export { generateTokenThemeId } from "./generateTokenThemeId";
+export { generateTokenThemeComparison } from "./generateTokenThemeComparison";
 export { getColorMarkdown } from "./getColorMarkdown";
 export { getTokenDiagnosticsLink } from "./getTokenDiagnosticsLink";
 export { getTokenExplorerLink } from "./getTokenExplorerLink";
