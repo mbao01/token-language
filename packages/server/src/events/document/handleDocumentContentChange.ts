@@ -4,10 +4,10 @@ import { validateTextDocument } from "../../helpers/validateDocument";
 import { CAPABILITIES } from "../../server/capabilities";
 import { connection } from "../../server/connection";
 
-export const handleDocumentContentChange = (
+export const handleDocumentContentChange = async (
   change: TextDocumentChangeEvent<TextDocument>
 ) => {
   connection.console.log('📝 Document Changed: handleDocumentContentChange: start');
-  validateTextDocument(change.document, CAPABILITIES);
+  await validateTextDocument(change.document, CAPABILITIES);
   connection.console.log('📝 Document Changed: handleDocumentContentChange: end');
 };

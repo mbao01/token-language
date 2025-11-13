@@ -59,6 +59,9 @@ documents.onDidClose(handleDocumentClose);
 // emitted when the text document first opened or when its content has changed.
 documents.onDidChangeContent(handleDocumentContentChange);
 
+// emitted when the text document first opened or when its content has changed.
+documents.onWillSave(handleDocumentContentChange);
+
 /* --------- Listen --------- */
 // Make the text document manager listen on the connection
 // for open, change and close text document events

@@ -1,11 +1,12 @@
 import path from "path";
-import { Diagnostic, DiagnosticSeverity } from "vscode-languageserver/node";
+import { Diagnostic } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { getDocumentSettings, getGlobalSettings } from "./getDocumentSettings";
+import { getGlobalSettings } from "./getDocumentSettings";
 import type { CapabilitiesOptions } from "./types";
 import { getValueTokenDiagnostics } from "./diagnostics/getValueTokenDiagnostics";
 import { loadTokensFromFile } from "tokens-utilities/helpers";
 import { getAliasTokenDiagnostics, getDuplicateTokenDiagnostics } from "./diagnostics";
+import { connection } from "../server/connection";
 
 // 1. create a function that generates a missing token diagnostic
 
@@ -29,6 +30,8 @@ export const validateTextDocument = async (
   if (!textDocument.uri.includes(path.join(settings.tokens.srcPackage, "src"))) {
     return diagnostics;
   }
+
+  connection.console.log(`Validating document: ${textDocument.uri}`);
 
   const tokens = loadTokensFromFile(settings.tokens.json);
   if (!tokens) {

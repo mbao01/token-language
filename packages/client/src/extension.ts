@@ -31,6 +31,8 @@ export function activate(context: ExtensionContext) {
     },
   };
 
+  const srcPackage = workspace.getConfiguration("tokenLanguage").get("tokens.srcPackage");
+
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
@@ -46,7 +48,7 @@ export function activate(context: ExtensionContext) {
     ],
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher("**/tokens/*.json"),
+      fileEvents: workspace.createFileSystemWatcher(`${srcPackage}/src/**/*.json`),
     },
     markdown: {
       isTrusted: true,
