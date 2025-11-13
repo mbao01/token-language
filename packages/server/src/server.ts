@@ -40,7 +40,6 @@ connection.onDidChangeWatchedFiles(handleFileChange);
 // emitted when an item is hovered on
 connection.onHover(handleHover);
 
-/* --------- User Requests --------- */
 // emitted when a references is requested for an item
 connection.onReferences(handleReferences);
 

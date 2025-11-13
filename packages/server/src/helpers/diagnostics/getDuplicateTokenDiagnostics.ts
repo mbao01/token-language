@@ -175,15 +175,9 @@ export const getDuplicateTokenDiagnostics = async (
       isValueMatching: boolean;
       isOriginalValueMatching: boolean;
     }[] = [];
-    const unused: {
-      token: TokenNode;
-      isUnusedAlias: true;
-    }[] = [];
 
     Object.entries(allThemeTokens).forEach(([theme, tokens]) => {
       const token = themeTokenMap[theme];
-
-      let isUsedAlias = false;
 
       tokens.forEach((t) => {
         if (!(hasMatchingName(t, token) && hasMatchingTheme(t, token))) {
@@ -203,22 +197,8 @@ export const getDuplicateTokenDiagnostics = async (
                 isOriginalValueMatching,
               });
           }
-
-          // checking for unused aliases
-          if (token._tokenType === "alias" && t.src === token.src) {
-            if (t.originalValue.includes(`{!${token.name}}`)) {
-              isUsedAlias = true;
-            }
-          }
         }
       });
-
-      if (!isUsedAlias) {
-        unused.push({
-          token,
-          isUnusedAlias: true,
-        });
-      }
     });
 
     if (duplicates.length) {
@@ -257,41 +237,6 @@ export const getDuplicateTokenDiagnostics = async (
                 }`,
                 `Is a definition? ${query.isDefinition}`,
               ].join("\n"),
-            };
-          })
-          .filter(Boolean) as Diagnostic["relatedInformation"];
-      }
-
-      diagnostics.push(diagnostic);
-    }
-
-    if (unused.length) {
-      const code = "unused-alias";
-      const diagnostic: Diagnostic = {
-        code,
-        severity: DiagnosticSeverity.Warning,
-        codeDescription: {
-          href: getTokenDiagnosticsLink(code),
-        },
-        data: "Some data",
-        range: {
-          start: textDocument.positionAt(index),
-          end: textDocument.positionAt(index + found.length),
-        },
-        message: `Unused alias found for '${name}'. Consider removing it if not needed.`,
-        source: "IntelliTokens",
-      };
-
-      if (options?.hasDiagnosticRelatedInformationCapability) {
-        diagnostic.relatedInformation = unused
-          .map(({ token }) => {
-            const location = findLocationInSource(token, { isDefinition });
-
-            if (!location) return;
-
-            return {
-              location,
-              message: `Alias defined at ${token.src}/${token.category}.json is not used.`,
             };
           })
           .filter(Boolean) as Diagnostic["relatedInformation"];
