@@ -1,5 +1,7 @@
 import { TokenNode } from "@/token";
 import { PLATFORM_HIERARCHY_CONFIG } from "../../constants";
+import { convertSrcToPath } from "./convertSrcToPath";
+import { findMatchingToken } from "./findMatchingToken";
 
 type FindTokenArgs = {
   query: Pick<TokenNode, "name" | "src" | "category"> & {
@@ -38,7 +40,7 @@ type FindTokenArgs = {
  *   },
  *   tokens: allTokens
  * });
- * 
+ *
  * console.log(result.exists); // true if found in any theme
  * console.log(result.themeTokenMap);
  * // {
@@ -47,7 +49,7 @@ type FindTokenArgs = {
  * //   "IOS_DEFAULT_LIGHT": TokenNode,
  * //   ...
  * // }
- * 
+ *
  * console.log(result.allThemeTokens);
  * // {
  * //   "WEB_DEFAULT_LIGHT": [TokenNode1, TokenNode2],
@@ -65,7 +67,7 @@ type FindTokenArgs = {
  *   },
  *   tokens: allTokens
  * });
- * 
+ *
  * // Check if token exists across themes
  * if (aliasResult.exists) {
  *   Object.entries(aliasResult.themeTokenMap).forEach(([theme, token]) => {
@@ -80,7 +82,7 @@ type FindTokenArgs = {
  *   query: { name: "SPACING_MD", src: "spacing", category: "spacing", isDefinition: true },
  *   tokens: allTokens
  * });
- * 
+ *
  * Object.entries(diagnosticData.allThemeTokens).forEach(([theme, tokens]) => {
  *   if (tokens.length > 1) {
  *     console.warn(`Multiple tokens found for theme ${theme}:`, tokens.map(t => t.src));
@@ -92,7 +94,7 @@ type FindTokenArgs = {
  *   query: { name: "FONT_SIZE_BODY", src: "typography", category: "fonts" },
  *   tokens: allTokens
  * });
- * 
+ *
  * const lightThemes = Object.entries(comparison.themeTokenMap)
  *   .filter(([theme]) => theme.includes('LIGHT'))
  *   .map(([theme, token]) => ({ theme, value: token?.value }));
@@ -133,7 +135,7 @@ export const findMatchingThemeTokens = ({ query, tokens }: FindTokenArgs) => {
       // Note: t.src is like ui/all-platforms while path is like src/ui/all-platforms
       const foundPath = paths.find(
         (path) =>
-          path.endsWith(t.src) &&
+          convertSrcToPath(t.src) === path &&
           platform === t.platform &&
           mode === t.mode &&
           (t.buildName.startsWith(buildName) || t.buildName === "default")
@@ -141,7 +143,11 @@ export const findMatchingThemeTokens = ({ query, tokens }: FindTokenArgs) => {
       if (foundPath)
         allThemeTokens[theme] = [...(allThemeTokens[theme] || []), t];
 
-      if (foundThemeToken[theme] && foundThemeToken[theme].buildName !== 'default') return;
+      if (
+        foundThemeToken[theme] &&
+        foundThemeToken[theme].buildName !== "default"
+      )
+        return;
       if (foundPath) foundThemeToken[theme] = t || null;
     });
   });
